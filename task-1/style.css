@@ -1,0 +1,58 @@
+table, th, td {
+    border: 1px solid black;
+}
+
+body {
+    background-color: #e6ca4e;
+}
+
+h1 {
+    font-size: 48px;
+    text-align: center;
+    font-weight: bold;
+    font-style: italic;
+    background-color: #e72e2e;
+    color: #e6ca4e;
+    border-bottom: 10px solid #a02a2a; 
+}
+
+h2 {
+    font-size: 32px;
+    background-color: #1c9c18;
+    color: #d6c57a;
+    padding: 10px 0;
+}
+
+p{
+    font-size: 20px;
+}
+
+ul, ol {
+    color: #e72e2e;
+}
+
+#table-dummy {
+    background-color: #aaaaaa;
+}
+
+.googleImg {
+    background-color: #ffffff;
+    width: 300px;
+    height: auto;
+}
+
+#inpForm label{
+    display: inline-block;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-size: 18px;
+}
+
+#inpForm input, #inpForm textarea{
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+.greyText {
+    color: #616161;
+}
