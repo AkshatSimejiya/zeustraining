@@ -3,7 +3,8 @@ table, th, td {
 }
 
 body {
-    background-color: #e6ca4e;
+    background-color: #FFFFCC;
+    font-family:Arial, Helvetica, sans-serif;
 }
 
 h1 {
@@ -11,16 +12,22 @@ h1 {
     text-align: center;
     font-weight: bold;
     font-style: italic;
-    background-color: #e72e2e;
-    color: #e6ca4e;
-    border-bottom: 10px solid #a02a2a; 
+    background-color: #990300;
+    color: #FFFFCC;
+    border-bottom: 10px solid #CC0600; 
+    letter-spacing: 18px;
+}
+
+.zeuslink {
+    text-decoration: none;
+    /* color: #8C1C88; */
+    color: #A34594;
 }
 
 h2 {
-    font-size: 32px;
-    background-color: #1c9c18;
-    color: #d6c57a;
-    padding: 10px 0;
+    background-color: #009801;
+    color: #FFFFFF;
+    padding: 5px 10px;
 }
 
 p{
@@ -28,31 +35,81 @@ p{
 }
 
 ul, ol {
-    color: #e72e2e;
+    /* color: #e72e2e; */
+    color: #B44438;
+    font-style: italic;
+    font-weight: 800;
 }
 
 #table-dummy {
-    background-color: #aaaaaa;
+    background-color: #CCCCCC;
+}
+
+.main-heading {
+    margin-bottom: 8px;
+}
+
+.heading-1 {
+    margin-top: 5px;
 }
 
 .googleImg {
     background-color: #ffffff;
-    width: 300px;
+    width: 165px;
     height: auto;
 }
 
 #inpForm label{
     display: inline-block;
     margin-top: 15px;
-    margin-bottom: 5px;
+    margin-bottom: 15px;
     font-size: 18px;
+    font-weight: normal;
 }
 
 #inpForm input, #inpForm textarea{
-    margin-bottom: 15px;
     font-size: 18px;
 }
 
+#inpForm textarea{
+    overflow-y: scroll;
+    font-family: 'Times New Roman', Times, serif;
+}
+
+#inpForm input::placeholder, #inpForm textarea::placeholder{
+    color: #626262;
+}
+
 .greyText {
-    color: #616161;
+    color: #999999;
+    font-size: 22px;
+}
+
+.note-sp {
+    font-style: italic;
+    font-weight: bold;
+}
+
+.google-img-container {
+    padding: 30px 70px 30px 30px;
+    background-color: #ffffff;
+    display: inline-block;
+    border: 1px dashed #0f0f0f;
+}
+
+.note-mn {
+    margin-bottom: 10px;
+}
+
+#inpForm label.genderLabel {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+#submit_btn {
+    margin-top: 15px;
+}
+
+.text-p-1 {
+    text-align: justify;
 }
