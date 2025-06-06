@@ -4,8 +4,101 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quantum</title>
+    <link rel="stylesheet" href="./assets/css/style.css">
 </head>
 <body>
     
+    <div class="login-container">
+        <header>
+            <a href="./index.html">
+                <img src="./assets/icons/logo used in header.svg">
+            </a>
+        </header>
+
+        <div class="login-form-container">
+            <div class="login-form">
+                <form>
+                    <div><button class="back-btn"><img src="./assets/icons/back.svg"></button> <h2>Log in with Quantum</h2></div>
+
+                    <!-- Start of Form -->
+                    <div class="form-content">
+                        <div class="radio-group">
+                            <div class="radio-btn">
+                                <input type="radio" id="district" name="type" value="district">
+                                <label for="district"><img src="./assets/icons/radio-button-off.svg" alt="Radio Button"> District</label><br>
+                            </div>
+                            <div class="radio-btn">
+                                <input type="radio" id="independentSchool" name="type" value="independentSchool">
+                                <label for="independentSchool"><img src="./assets/icons/radio-button-off.svg" alt="Radio Button"> Independent School</label><br>
+                            </div>
+                        </div>
+
+                        <div class="select-group">
+                            <div>
+                                <label for="state">State*</label><br>
+                                <select name="state" id="state">
+                                    <option value="alabama">Alabama</option>
+                                    <option value="california">California</option>
+                                    <option value="delaware">Delaware</option>
+                                    <option value="colorado">Colorado</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="district">District*</label><br>
+                                <select name="district" id="district">
+                                    <option value="alabamaschooldistrict">Alabama School District</option>
+                                    <option value="californiaschooldistrict">California School District</option>
+                                    <option value="delawareschooldistrict">Delaware School District</option>
+                                    <option value="coloradoschooldistrict">Colorado School District</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="user-details">
+                            <div class="user-detail">
+                                <input type="text" name="username" placeholder="Username/Email ID*">
+                                <a href="./index.html">FORGOT USERNAME?</a>
+                            </div>
+                            <div class="user-detail">
+                                <input type="password" name="password" placeholder="Password*">
+                                <span class="password-toggle-icon"><img src="./assets/icons/preview.svg"></span>
+                                <a href="./index.html">FORGOT PASSWORD?</a>
+                            </div>
+                        </div>
+
+                        <div class="remember-div">
+                            <input type="checkbox" name="remember" id="rememberBtn" checked>
+                            <label for="rememberBtn">Remember Me</label>
+                        </div>
+                        
+                        <div class="submit-Btn">
+                            <button type="submit" class="submitBtn">LOG IN</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="page-links">
+                <a href="">About</a>
+                <div class="seperator"></div>
+                <a href="">Contact Us</a>
+            </div>
+        </div>
+        
+        <footer>
+            <a href="./index.html">
+                <img src="./assets/icons/logo used in footer.svg">
+            </a>
+
+            <div class="seperator"></div>
+
+            <div class="copyrights-main">
+                <p>Copyright © 2020-2021</p> 
+                <p>Zeus Systems Pvt. Ltd.</p> 
+                <p>All rights reserved.</p> 
+            </div>
+        </footer>
+    </div>
+
 </body>
 </html>

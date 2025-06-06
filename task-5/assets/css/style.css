@@ -1,0 +1,249 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+@font-face {
+    font-family: "Quicksand";
+    src: url("../Quicksandfont1/Quicksand-VariableFont_wght.woff2") format("woff2");
+}
+
+body {
+    font-family: "Quicksand";
+}
+
+.login-container {
+    width: 100%;
+    height: 100vh;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.login-container header{
+    background: url('../header\ pattern\ image.png') #25313F;
+    background-repeat: no-repeat;
+    background-size: cover;
+    border-bottom: 2px solid #31B9E4;
+    background-blend-mode: overlay;
+}
+
+.login-container header a {
+    display: inline-block;
+    margin: 15.77px 0 11.68px 24px;
+}
+
+.login-form-container {
+    background: #EEEEEE;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-form {
+    padding: 20px 33px 24px 32px;
+    background-color: #FFFFFF;
+    border-top: 4px solid #3AC7EC;
+    border-radius: 2px 2px 5px 5px;
+    width: 48%;
+    max-width: 488px;
+}
+
+.login-form>form>div:first-child {
+    display: flex;
+    justify-content: center;
+}
+
+footer {
+    height: 40px;
+    width: 100%;
+    display: flex;
+    background-color: #E0E1E1;
+    align-items: center;
+    justify-content: center;
+    column-gap: 32px;
+}
+
+.copyrights-main {
+    display: flex;
+    font-size: 12px;
+    column-gap: 8px;
+}
+
+.copyrights-main p:nth-child(1), .copyrights-main p:nth-child(3){
+    color: #616161;
+}
+
+.copyrights-main p:nth-child(2){
+    color: #616161;
+    font-weight: bold;
+}
+
+.seperator {
+    width: 1px;
+    height: 24px;
+    background-color: #0000001F;
+}
+
+.back-btn {
+    background-color: transparent;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.back-btn img {
+    width: 17px;
+    height: 26px;
+}
+
+.login-form form div h2{
+    font-weight: 500;
+    font-size: 24px;
+    letter-spacing: 0px;
+    color: #222222;
+    opacity: 1;
+    width: 100%;
+    text-align: center;
+}
+
+.page-links {
+    display: flex;
+    margin-top: 32px;
+    column-gap: 8px;
+}
+
+.page-links a {
+    color: #1F7A54;
+    font-weight: 500;
+}
+
+.form-content {
+    margin-top: 34px;
+}
+
+.radio-group {
+    display: flex;
+    column-gap: 32px;
+}
+
+.radio-group input[type="radio"] {
+  width: 0;
+  opacity: 0;
+}
+
+.radio-group input[type=radio]:checked + label > img {
+  background: url("../icons/radio-button-on.svg") no-repeat;
+}
+
+.radio-btn label{
+    display: inline-flex;
+    column-gap: 8px;
+    align-items: center;
+    font-weight: 500;
+    font-size: 16px;
+    color: #333333;
+}
+
+.select-group {
+    margin-top: 23px;
+    margin-bottom: 56px;
+}
+
+.select-group > div:first-child {
+    margin-bottom: 36px;
+}
+
+.select-group label {
+    font-size: 12px;
+    color: #666666;
+}
+
+.select-group select {
+    color: #222222;
+    font-size: 16px;
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    padding: 5px 0 4px 0;
+
+    -moz-appearance:none; /* Firefox */
+    -webkit-appearance:none; /* Safari and Chrome */
+    appearance:none;
+
+    background: url('../icons/arrow-down.svg') no-repeat right white;
+}
+
+.select-group select:focus {
+    border: none;
+}
+
+.user-details input{
+    width: 100%;
+    border: none;
+    font-size: 16px;
+    color: #666666;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    padding-bottom: 4px;
+    margin-bottom: 5px;
+}
+
+.user-details input::placeholder {
+    font-size: 16px;
+    color: #666666;
+}
+
+.user-details input:focus-visible {
+    outline: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.user-details a {
+    display: inline-block;
+    width: 100%;
+    text-decoration: none;
+    color: #1F7A54;
+    font-size: 14px;
+    text-align: right;
+    font-weight: 500;
+}
+
+.user-details .user-detail:first-child {
+    margin-bottom: 33px;
+}
+
+.user-detail {
+    position: relative;
+} 
+
+.user-detail span {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-100%);
+    cursor: pointer;
+}
+
+.remember-div {
+    margin-top: 26px;
+    margin-bottom: 34px;
+}
+
+.submitBtn {
+    background-color: #3FD28B;
+    width: 215px;
+    margin: auto;
+    border: none;
+    height: 40px;
+    box-shadow: 0px 3px 5px #0000003D;
+}
+
+.submit-Btn {
+    width: 100%;
+}
