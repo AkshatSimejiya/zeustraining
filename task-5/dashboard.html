@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Dashboard</title>
+    <link rel="stylesheet" href="./assets/css/style.css">
+</head>
+<body>
+    
+    <div class="dashboard-container">
+        <header>
+            <a href="./index.html" class="logo-image">
+                <img src="./assets/icons/logo used in header.svg">
+            </a>
+
+            <div class="nav-links">
+                <a href="" class="active">DASHBOARD</a>
+                <a href="">CONTENT</a>
+                <a href="">USERS</a>
+                <a href="">REPORTS</a>
+                <a href="">ADMIN</a>
+
+                <div class="icon bell-icon">
+                    <img src="./assets/icons/alerts.svg" alt="Alerts">
+                    <span class="notif">2</span>
+                </div>
+                <div class="icon announcement-icon">
+                    <img src="./assets/icons/announcements.svg" alt="announcements">
+                    <span class="notif">1</span>
+                </div>
+                <div class="icon profile-icon">
+                    <img src="./assets/icons/account_circle.svg" alt="profile">
+                    <span class="user-noti">T</span>
+                </div>
+                <div class="hamburger" id="hamburger-menu">
+                    <img src="./assets/icons/hamburger-menu.svg" alt="">
+                </div>
+            </div>
+        </header>
+
+        <div class="mobile-links">
+            <div class="mobile-links-container">
+                <ul>
+                    <li><a href="" class="active">DASHBOARD</a></li>
+                    <li><a href="">CONTENT</a></li>
+                    <li><a href="">USERS</a></li>
+                    <li><a href="">REPORTS</a></li>
+                    <li><a href="">ADMIN</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="dashboard-main-container">
+
+            <div class="dashboard-content">
+                <div class="dashboard-tabs">
+                    <div class="dashboard-tab tab-active">
+                        <img src="./assets/icons/courses.svg" alt="">
+                        <p><span>4</span> Courses</p>
+                    </div>
+                    <div class="dashboard-tab">
+                        <img src="./assets/icons/classes.svg" alt="">
+                        <p><span>4</span> Classes</p>
+                    </div>
+                </div>
+
+                <div class="dashboard-search">
+                    <div>Showing 4 of 4 courses</div>
+
+                    <div class="sort-by-field">
+                        <label for="sortby">Sort By:</label>
+
+                        <select name="sort" id="sortby">
+                            <option value="coursename">Course Name</option>
+                            <option value="units">Units</option>
+                            <option value="topics">Topics</option>
+                            <option value="subjects">Subjects</option>
+                        </select>
+
+                        <div class="sort-arrow">
+                            <img src="./assets/icons/sort.svg" alt="">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-cards">
+                    <div class="dashboard-card">
+                        <div class="card-content">
+                            <div class="card-image">
+                                <img src="./assets/images/imageMask.png" alt="">
+                            </div>
+                            <div class="card-details">
+                                <h2>Acceleration</h2>
+                                <div class="sub-grade">
+                                    <p>Physics</p>
+                                    <div class="seperator"></div>
+                                    <p>Grage 7<span>+2</span></p> 
+                                </div>
+                                <div class="course-content">
+                                    <p><span>4</span> Units</p>
+                                    <p><span>18</span> Lessons</p>
+                                    <p><span>24</span> Topics</p>
+                                </div>
+                                <div class="prof-select">
+                                    <select name="professor" id="profsel">
+                                        <option value="mrfrankclassb">Mr. Frank's Class B</option>
+                                        <option value="allclasses">All Classes</option>
+                                        <option value="mrfrankclassa">Mr. Frank's Class A</option>
+                                        <option value="mrfrankclassc">Mr. Frank's Class C</option>
+                                    </select>
+                                </div>
+                                <div class="sub-grade card-stats">
+                                    <p>50 Students</p>
+                                    <div class="seperator"></div>
+                                    <p>21-Jan-2020 - 21-Aug-2020</p>
+                                </div>
+                                <div class="favourite-icon">
+                                    <img src="./assets/icons/favourite.svg" alt="">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <div class="card-action-icon">
+                                <img src="./assets/icons/preview.svg" alt="">
+                            </div>
+                            <div class="card-action-icon">
+                                <img src="./assets/icons/manage course.svg" alt="">
+                            </div>
+                            <div class="card-action-icon">
+                                <img src="./assets/icons/grade submissions.svg" alt="">
+                            </div>
+                            <div class="card-action-icon">
+                                <img src="./assets/icons/reports.svg" alt="">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+
+                        <div class="card-content">
+                            <div class="card-image">
+                                <img src="./assets/images/imageMask-1.png" alt="">
+                            </div>
+                            <div class="card-details">
+                                <h2>Displacement, Velocity and Speed</h2>
+                                <div class="sub-grade">
+                                    <p>Physics 2</p>
+                                    <div class="seperator"></div>
+                                    <p>Grage 6<span>+3</span></p> 
+                                </div>
+                                <div class="course-content">
+                                    <p><span>2</span> Units</p>
+                                    <p><span>15</span> Lessons</p>
+                                    <p><span>20</span> Topics</p>
+                                </div>
+                                <div class="prof-select disabled">
+                                    <select name="professor" id="profsel">
+                                        <option value="allclasses">No Classes</option>
+                                        <option value="mrfrankclassb">Mr. Frank's Class B</option>
+                                        <option value="mrfrankclassa">Mr. Frank's Class A</option>
+                                        <option value="mrfrankclassc">Mr. Frank's Class C</option>
+                                    </select>
+                                </div>
+
+                                <div class="favourite-icon">
+                                    <img src="./assets/icons/favourite.svg" alt="">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <div class="card-action-icon">
+                                <img src="./assets/icons/preview.svg" alt="">
+                            </div>
+                            <div class="card-action-icon icon-disabled">
+                                <img src="./assets/icons/manage course.svg" alt="">
+                            </div>
+                            <div class="card-action-icon icon-disabled">
+                                <img src="./assets/icons/grade submissions.svg" alt="">
+                            </div>
+                            <div class="card-action-icon">
+                                <img src="./assets/icons/reports.svg" alt="">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <div class="card-content">
+                            <div class="card-image">
+                                <img src="./assets/images/imageMask-3.png" alt="">
+                            </div>
+                            <div class="card-details">
+                                <h2>Introduction to Biology: Micro organisms and how they affec...</h2>
+                                <div class="sub-grade">
+                                    <p>Biology</p>
+                                    <div class="seperator"></div>
+                                    <p>Grade 4<span>+1</span></p> 
+                                </div>
+                                <div class="course-content">
+                                    <p><span>5</span> Units</p>
+                                    <p><span>16</span> Lessons</p>
+                                    <p><span>22</span> Topics</p>
+                                </div>
+                                <div class="prof-select">
+                                    <select name="professor" id="profsel">
+                                        <option value="allclasses">All Classes</option>
+                                        <option value="mrfrankclassb">Mr. Frank's Class B</option>
+                                        <option value="mrfrankclassa">Mr. Frank's Class A</option>
+                                        <option value="mrfrankclassc">Mr. Frank's Class C</option>
+                                    </select>
+                                </div>
+
+                                <div class="sub-grade card-stats">
+                                    <p>300 Students</p>
+                                </div>
+
+                                <div class="favourite-icon">
+                                    <img src="./assets/icons/favourite.svg" alt="">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <div class="card-action-icon">
+                                <img src="./assets/icons/preview.svg" alt="">
+                            </div>
+                            <div class="card-action-icon icon-disabled">
+                                <img src="./assets/icons/manage course.svg" alt="">
+                            </div>
+                            <div class="card-action-icon icon-disabled">
+                                <img src="./assets/icons/grade submissions.svg" alt="">
+                            </div>
+                            <div class="card-action-icon">
+                                <img src="./assets/icons/reports.svg" alt="">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <div class="ex-label">
+                            <span>EXPIRED</span>
+                        </div>
+                        
+                        <div class="card-content">
+                            <div class="card-image">
+                                <img src="./assets/images/imageMask.png" alt="">
+                            </div>
+                            <div class="card-details">
+                                <h2>Introduction to High School Mathematics</h2>
+                                <div class="sub-grade">
+                                    <p>Mathematics</p>
+                                    <div class="seperator"></div>
+                                    <p>Grade 8<span>+3</span></p> 
+                                </div>
+                                <div class="course-content">
+                                </div>
+                                <div class="prof-select">
+                                    <select name="professor" id="profsel">
+                                        <option value="mrfrankclassa">Mr. Frank's Class A</option>
+                                        <option value="mrfrankclassb">Mr. Frank's Class B</option>
+                                        <option value="allclasses">All Classes</option>
+                                        <option value="mrfrankclassc">Mr. Frank's Class C</option>
+                                    </select>
+                                </div>
+
+                                <div class="sub-grade card-stats">
+                                    <p>44 Students</p>
+                                    <div class="seperator"></div>
+                                    <p>14-Oct-2019 - 20-Oct-2020</p>
+                                </div>
+                                
+                                <div class="favourite-icon">
+                                    <img src="./assets/icons/favouritegrey.svg" alt="">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <div class="card-action-icon">
+                                <img src="./assets/icons/preview.svg" alt="">
+                            </div>
+                            <div class="card-action-icon">
+                                <img src="./assets/icons/manage course.svg" alt="">
+                            </div>
+                            <div class="card-action-icon">
+                                <img src="./assets/icons/grade submissions.svg" alt="">
+                            </div>
+                            <div class="card-action-icon">
+                                <img src="./assets/icons/reports.svg" alt="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- <div class="page-links">
+                <a href="">About</a>
+                <div class="seperator"></div>
+                <a href="">Contact Us</a>
+            </div> -->
+        </div>
+        
+        <div class="dashboard-footer">
+            <div class="page-links">
+                <a href="">About</a>
+                <div class="seperator"></div>
+                <a href="">Contact Us</a>
+            </div>
+            <footer>
+                <a href="./index.html">
+                    <img src="./assets/icons/logo used in footer.svg">
+                </a>
+
+                <div class="seperator"></div>
+
+                <div class="copyrights-main">
+                    <p>Copyright © 2020-2021</p> 
+                    <p>Zeus Systems Pvt. Ltd.</p> 
+                    <p>All rights reserved.</p> 
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script src="./assets/js/script.js"></script>
+</body>
+</html>

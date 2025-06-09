@@ -10,7 +10,7 @@
     
     <div class="login-container">
         <header>
-            <a href="./index.html">
+            <a href="./index.html" class="logo-image">
                 <img src="./assets/icons/logo used in header.svg">
             </a>
         </header>
@@ -44,8 +44,8 @@
                                 </select>
                             </div>
                             <div>
-                                <label for="district">District*</label><br>
-                                <select name="district" id="district">
+                                <label for="district2">District*</label><br>
+                                <select name="district" id="district2">
                                     <option value="alabamaschooldistrict">Alabama School District</option>
                                     <option value="californiaschooldistrict">California School District</option>
                                     <option value="delawareschooldistrict">Delaware School District</option>
@@ -60,14 +60,14 @@
                                 <a href="./index.html">FORGOT USERNAME?</a>
                             </div>
                             <div class="user-detail">
-                                <input type="password" name="password" placeholder="Password*">
+                                <input type="password" name="password" id="password" placeholder="Password*">
                                 <span class="password-toggle-icon"><img src="./assets/icons/preview.svg"></span>
                                 <a href="./index.html">FORGOT PASSWORD?</a>
                             </div>
                         </div>
 
                         <div class="remember-div">
-                            <input type="checkbox" name="remember" id="rememberBtn" checked>
+                            <input type="checkbox" name="remember" class="check_box" id="rememberBtn" checked>
                             <label for="rememberBtn">Remember Me</label>
                         </div>
                         
@@ -100,5 +100,6 @@
         </footer>
     </div>
 
+    <script src="./assets/js/script.js"></script>
 </body>
 </html>
