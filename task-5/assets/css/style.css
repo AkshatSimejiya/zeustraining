@@ -483,12 +483,12 @@ select:focus-visible {
     margin-top: 24px;
     padding-bottom: 16px;
     margin-bottom: 16px;
-    border-bottom: 1px solid #000000;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
 }
 
 .dashboard-search {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: space-between;
 }
 
@@ -649,7 +649,7 @@ select:focus-visible {
 
 .card-content {
     padding-bottom: 16px;
-    border-bottom: 1px solid #000000;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
 }
 
 .card-actions {
@@ -694,6 +694,7 @@ select:focus-visible {
 @media only screen and (max-width: 768px) {
     .login-form-container {
         justify-content: space-between;
+        flex: 1;
     }
 
     .login-form {
