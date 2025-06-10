@@ -55,7 +55,9 @@ body {
 
 .login-container header a.logo-image, .dashboard-container header a.logo-image {
     display: inline-block;
-    margin: 10.5px 0 11.68px 24px;
+    margin: 10.5px 0 9.5px 24px;
+    width: 134.02px;
+    height: 35.99px;
 }
 
 .login-form-container {
@@ -154,6 +156,16 @@ body {
 .profile-icon {
     width: 32px;
     height: 32px;
+    position: relative;
+}
+
+.profile-icon .profile-image {
+    position: absolute;
+    border-radius: 50%;
+    top:6px;
+    left: 6px;
+    width: 22px;
+    height: 22px;
 }
 
 .profile-icon img {
@@ -718,6 +730,8 @@ select:focus-visible {
         overflow: hidden;
         transition: max-height 0.75s ease-in-out;
         z-index: 5;
+        position: absolute;
+        top: 57px;
     }
 
     .active-mobile {
@@ -737,6 +751,7 @@ select:focus-visible {
         display: flex;
         flex-direction: column;
         align-items: center;
+        row-gap: 5px;
     }
 
     .close-btn {
