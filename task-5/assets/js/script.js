@@ -19,9 +19,14 @@ if(togglePassword){
 if(document.getElementById('hamburger-menu')){
     const hamburger = document.getElementById('hamburger-menu');
     const mobileMenu = document.querySelector('.mobile-links');
+    const mobileClose = document.querySelector('.submit-Close');
 
     hamburger.addEventListener('click', ()=>{
         console.log("Clicked");
+        mobileMenu.classList.toggle("active-mobile")
+    })
+
+    mobileClose.addEventListener('click', ()=>{
         mobileMenu.classList.toggle("active-mobile")
     })
 }
