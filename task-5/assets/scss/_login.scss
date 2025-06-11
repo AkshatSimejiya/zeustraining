@@ -1,0 +1,263 @@
+.login-container{
+    width: 100%;
+    min-height: 100vh;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: #EEEEEE;
+
+    header {
+        background: url('../header\ pattern\ image.png') #25313F;
+        background-repeat: no-repeat;
+        background-size: cover;
+        border-bottom: 2px solid #31B9E4;
+        background-blend-mode: overlay;
+    }
+
+    a .logo-image {
+        display: inline-block;
+        margin: 10.5px 0 9.5px 24px;
+        width: 134.02px;
+        height: 35.99px;
+    }
+
+    .login-form-container {
+        background: #EEEEEE;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        .login-form {
+            padding: 20px 33px 24px 32px;
+            background-color: #FFFFFF;
+            border-top: 4px solid #3AC7EC;
+            border-radius: 2px 2px 5px 5px;
+            width: 48%;
+            max-width: 488px;
+            margin-top: 50px;
+
+            form {
+                .first-div-head {
+                    display: flex;
+                    justify-content: center;
+                    
+                }
+                div{
+                    h2{
+                        font-family: "Quicksand-Medium";
+                        font-size: 24px;
+                        letter-spacing: 0px;
+                        color: #222222;
+                        opacity: 1;
+                        width: 100%;
+                        text-align: center;
+                    }
+                    .back-btn {
+                        background-color: transparent;
+                        border: none;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        img {
+                            width: 26px;
+                            height: 26px;    
+                        }
+                    }
+                }
+            }
+
+            .form-content {
+                margin-top: 34px;
+
+                .radio-group {
+                    display: flex;
+                    justify-content: flex-start;
+                    column-gap: 32px;
+
+                    input[type="radio"] {
+                        width: 0;
+                        opacity: 0;
+
+                        &:checked + label {
+                            img{
+                                background: url("../icons/radio-button-on.svg") no-repeat;
+                            }
+                        }
+                    }
+
+                    .radio-btn{
+                        label{
+                            font-family: "Quicksand-Medium";
+                            display: inline-flex;
+                            column-gap: 8px;
+                            align-items: center;
+                            font-size: 16px;
+                            color: #333333;
+                        }
+                    } 
+                }
+
+                .select-group {
+                    margin-top: 23px;
+                    margin-bottom: 56px;
+
+                    label{
+                        font-size: 12px;
+                        color: #666666;
+                    }
+
+                    select {
+                        color: #222222;
+                        font-size: 16px;
+                        width: 100%;
+                        background: transparent;
+                        border: none;
+                        border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+                        padding: 5px 0 4px 0;
+
+                        -moz-appearance:none; /* Firefox */
+                        -webkit-appearance:none; /* Safari and Chrome */
+                        appearance:none;
+
+                        background: url('../icons/arrow-down.svg') no-repeat right white;
+
+                        &:focus-visible {
+                            outline: none;
+                            appearance: none;
+                        }
+                    }
+                }
+
+                label, select , input {
+                    font-family: "Quicksand-Medium";
+                } 
+
+                .select-group > div:first-child {
+                    margin-bottom: 36px;
+                }
+
+                .user-details{
+                    input{
+                        width: 100%;
+                        border: none;
+                        font-size: 16px;
+                        color: #666666;
+                        border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+                        padding-bottom: 4px;
+                        margin-bottom: 5px;
+
+                        &::placeholder {
+                            font-size: 16px;
+                            color: #666666;
+                        }
+
+                        &:focus-visible {
+                            outline: none;
+                            border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+                            
+                        }
+                    }
+                    a{
+                        display: inline-block;
+                        width: 100%;
+                        text-decoration: none;
+                        color: #1F7A54;
+                        font-size: 14px;
+                        text-align: right;
+                        font-family: "Quicksand-Medium";    
+                    }
+                    .user-detail:first-child {
+                        margin-bottom: 33px;
+                    }
+
+                    .user-detail{
+                        position: relative;
+                        
+                        span {
+                            position: absolute;
+                            top: 50%;
+                            right: 10px;
+                            transform: translateY(-100%);
+                            cursor: pointer;
+                        }
+                    }
+                } 
+
+                .remember-div {
+                    margin-top: 2px;
+                    margin-bottom: 32px;
+
+                    .check_box {
+                        display:none;
+                    }
+
+                    .check_box + label{
+                        background:url('../icons/checkbox-unchecked.svg') no-repeat;
+                        display:inline-flex;
+                        padding-left: 28px;
+                        font-size: 16px;
+                    }
+
+                    .check_box:checked + label{
+                        background:url('../icons/checkbox-checked.svg') no-repeat;
+                    }
+                }
+
+                .submit-Btn {
+                    width: 100%;
+                    display: flex;
+                    align-items: center;
+
+                    .submitBtn {
+                        background-color: #3FD28B;
+                        width: 215px;
+                        margin: auto;
+                        border: none;
+                        height: 40px;
+                        box-shadow: 0px 3px 5px #0000003D;
+                        font-family: "Quicksand-Medium";
+                        font-size: 14px;
+                    }
+                }
+            }
+
+        }
+
+        .page-links {
+            display: flex;
+            margin-top: 32px;
+            column-gap: 8px;
+            margin-bottom: 16px;
+
+            a {
+               color: #1F7A54;
+                font-family: "Quicksand-Medium";
+                text-decoration: none;
+                font-size: 14px;
+            }
+        }
+    }
+}
+
+@media (max-width:768px){
+
+    .login-container {
+        .login-form-container {
+            justify-content: space-between;
+            flex: 1;
+
+            .login-form {
+                margin-top: 50px;
+                width: 56%;
+            }
+        }
+    }
+
+    .page-links {
+        margin-bottom: 16px;
+    }
+}
