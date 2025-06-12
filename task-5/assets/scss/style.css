@@ -306,8 +306,150 @@ footer .copyrights-main p:nth-child(2) {
   flex-direction: column;
   align-items: center;
 }
+.dashboard-container .bell-icon {
+  position: relative;
+}
+.dashboard-container .bell-icon #Path_3675 {
+  transition: all 500ms ease-in-out;
+}
+.dashboard-container .bell-icon:hover .notif {
+  opacity: 0;
+}
+.dashboard-container .bell-icon:hover #Path_3675 {
+  fill: #ffffff;
+}
+.dashboard-container .bell-icon .alert-div {
+  position: absolute;
+  width: 315px;
+  right: 0;
+  top: 43px;
+  background-color: #FFFFFF;
+  box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.1607843137);
+  z-index: 5;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 700ms ease-in-out;
+}
+.dashboard-container .bell-icon .alert-div::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 50px;
+  top: -25px;
+}
+.dashboard-container .bell-icon .alert-div .marked-done {
+  background-color: #FFFFEE;
+}
+.dashboard-container .bell-icon .alert-div .announcement-container {
+  max-height: 534px;
+  overflow-y: auto;
+}
+.dashboard-container .bell-icon .alert-div .announcement-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  width: 100%;
+  background: #FFFFFF;
+  box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.2392156863);
+  border-radius: 0px 0px 2px 2px;
+}
+.dashboard-container .bell-icon .alert-div .announcement-actions .seperator {
+  width: 1px;
+  height: 30px;
+  background-color: rgba(0, 0, 0, 0.1215686275);
+}
+.dashboard-container .bell-icon .alert-div .announcement-actions button {
+  width: 50%;
+  background: transparent;
+  border: none;
+  color: #1F7A54;
+  font-size: 14px;
+}
+.dashboard-container .bell-icon .alert-div .announcement-item {
+  max-width: 100%;
+  padding: 16px;
+  border-bottom: 1px solid rgba(34, 34, 34, 0.1215686275);
+  font-family: "Quicksand-Medium";
+  position: relative;
+}
+.dashboard-container .bell-icon .alert-div .announcement-item .marked {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #1F7A54;
+}
+.dashboard-container .bell-icon .alert-div .announcement-item .marked img {
+  width: 100%;
+  height: 100%;
+}
+.dashboard-container .bell-icon .alert-div .announcement-item .marked-check {
+  background-color: transparent;
+  border: 1px solid #1F7A54;
+}
+.dashboard-container .bell-icon .alert-div .announcement-item .tutor-name {
+  color: #6E6E6E;
+  font-size: 12px;
+}
+.dashboard-container .bell-icon .alert-div .announcement-item .tutor-name span {
+  color: #222222;
+}
+.dashboard-container .bell-icon .alert-div .announcement-item .course-announcement {
+  font-size: 14px;
+  color: #222222;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  max-width: 254px;
+}
+.dashboard-container .bell-icon .alert-div .announcement-item .course-extra {
+  margin-top: 8px;
+  margin-bottom: 8px;
+  color: #6E6E6E;
+  font-size: 12px;
+}
+.dashboard-container .bell-icon .alert-div .announcement-item .course-extra span {
+  color: #222222;
+}
+.dashboard-container .bell-icon .alert-div .announcement-item .announcement-flex {
+  display: flex;
+  justify-content: flex-end;
+}
+.dashboard-container .bell-icon .alert-div .announcement-item .announcement-flex .announcement-date {
+  align-self: flex-end;
+}
+.dashboard-container .bell-icon .alert-div .announcement-item .announcement-flex p {
+  color: #6E6E6E;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+}
+.dashboard-container .bell-icon .alert-div .announcement-item .announcement-flex img {
+  width: 12px;
+  height: auto;
+}
+.dashboard-container .bell-icon .alert-active {
+  max-height: 700px;
+}
+.dashboard-container .bell-icon .alert-active {
+  display: block;
+}
 .dashboard-container .announcement-icon {
   position: relative;
+}
+.dashboard-container .announcement-icon #Forma_1 {
+  transition: all 500ms ease-in-out;
+}
+.dashboard-container .announcement-icon:hover .notif {
+  opacity: 0;
+}
+.dashboard-container .announcement-icon:hover #Forma_1 {
+  fill: #ffffff;
 }
 .dashboard-container .announcement-icon .announcement-div {
   position: absolute;
@@ -317,7 +459,16 @@ footer .copyrights-main p:nth-child(2) {
   background-color: #FFFFFF;
   box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.1607843137);
   z-index: 5;
-  display: none;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 700ms ease-in-out;
+}
+.dashboard-container .announcement-icon .announcement-div::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 50px;
+  top: -25px;
 }
 .dashboard-container .announcement-icon .announcement-div .marked-done {
   background-color: #FFFFEE;
@@ -412,7 +563,7 @@ footer .copyrights-main p:nth-child(2) {
   height: auto;
 }
 .dashboard-container .announcement-icon .announcement-active {
-  display: block;
+  max-height: 700px;
 }
 .dashboard-container header {
   justify-content: space-between;
@@ -465,18 +616,7 @@ footer .copyrights-main p:nth-child(2) {
   font-family: "Quicksand-Medium";
   color: #FFFFFF;
   font-size: 12px;
-}
-.dashboard-container header .nav-links .icon .notif {
-  position: absolute;
-  width: 17px;
-  height: 17px;
-  border-radius: 50%;
-  background-color: #2A7FF3;
-  top: -25%;
-  right: -25%;
-  font-family: "Quicksand-Medium";
-  color: #FFFFFF;
-  font-size: 12px;
+  transition: opacity 500ms ease-in;
 }
 .dashboard-container header .nav-links .profile-icon {
   width: 32px;
@@ -777,16 +917,15 @@ footer .copyrights-main p:nth-child(2) {
   .dashboard-container header .hamburger:hover #Path_1834 {
     fill: #ffffff;
   }
-  .dashboard-container header .hamburger:hover .menu-mobile {
-    max-height: 500px;
-    transition: max-height 0.3s ease-in;
+  .dashboard-container header .announcement-icon:hover .announcement-div {
+    display: block;
   }
   .dashboard-container header .menu-mobile {
     position: absolute;
     width: 280px;
     max-height: 0;
     padding: 0;
-    transition: max-height 0.3s ease-out;
+    transition: max-height 0.5s ease-out;
     overflow: hidden;
     right: 16px;
     top: 105%;
@@ -834,6 +973,9 @@ footer .copyrights-main p:nth-child(2) {
   }
   .dashboard-container header .menu-mobile ul li img {
     width: 24px;
+  }
+  .dashboard-container header .menu-mobile-active {
+    max-height: 500px;
   }
   .dashboard-container .dashboard-content .dashboard-cards {
     grid-template-columns: repeat(auto-fill, 571px);
