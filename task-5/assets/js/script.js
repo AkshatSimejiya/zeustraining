@@ -201,21 +201,6 @@ if(hamburger){
 
     alertDiv.innerHTML=alertContent;
 
-    // const announcementIcon = document.querySelector('.announcement-icon');
-
-    // announcementIcon.addEventListener('mouseover', ()=>{
-    //     console.log("Mouse Enter")
-    //     announcementContentDiv.classList.add('announcement-active')
-    // })
-
-    // announcementIcon.addEventListener('mouseout', ()=>{
-    //     console.log("Mouse Out")
-    //     setTimeout(()=>{
-    //         announcementContentDiv.classList.remove('announcement-active')
-    //     }, 2000)
-        
-    // })
-
     const bellIcon = document.querySelector('.bell-icon');
     const alertDv = document.querySelector('.alert-div');
 
@@ -288,6 +273,7 @@ if(hamburger){
 
     const dashboardContainer = document.querySelector('.dashboard-cards');
 
+    
     fetch('./assets/js/cardData.json')
     .then(response => response.json())
     .then(cardData => {
@@ -342,7 +328,6 @@ if(hamburger){
             </div>
         `;
         
-        // Append the card HTML to the dashboard
         dashboardContainer.innerHTML += cardHTML;
         });
     })
