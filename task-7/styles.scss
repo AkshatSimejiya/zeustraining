@@ -1,0 +1,28 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+
+.mainContainer {
+    width: 100vw;
+    height: 100vh;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(40%, 1fr));
+    column-gap: 3px;
+    row-gap: 3px;
+}
+
+.bgDiv {
+    background-color: #9e3d3d;
+    touch-action: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.childDiv {
+    background-color: #473d9e;
+    touch-action: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
