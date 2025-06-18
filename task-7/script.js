@@ -90,33 +90,30 @@ class DraggableChild {
 }
 
 class BackgroundContainer {
-  constructor(width, height) {
+  constructor(width=100, height=100) {
     this.element = document.createElement('div');
     this.element.className = 'bgDiv';
     this.element.style.width = `${width}%`
     this.element.style.height = `${height}%`
 
-    // this.child = new DraggableChild(this);
-
     this.child = new DraggableChild(this, '#473d9e');
     
-    // Update child position on resize
     window.addEventListener('resize', () => {
       this.child.applyRelativePosition();
     });
   }
 }
 
-const container = new BackgroundContainer(100, 100);
-const container2 = new BackgroundContainer(100, 100);
-const container3 = new BackgroundContainer(100, 100);
-const container4 = new BackgroundContainer(100, 100);
+const container = new BackgroundContainer();
+// const container2 = new BackgroundContainer();
+// const container3 = new BackgroundContainer();
+// const container4 = new BackgroundContainer();
 
 const mainDv = document.createElement("div");
 mainDv.setAttribute("class", "mainContainer")
 document.body.insertBefore(mainDv, document.body.firstChild);
 
 mainDv.appendChild(container.element)
-mainDv.appendChild(container2.element)
-mainDv.appendChild(container3.element)
-mainDv.appendChild(container4.element)
+// mainDv.appendChild(container2.element)
+// mainDv.appendChild(container3.element)
+// mainDv.appendChild(container4.element)

@@ -7,7 +7,7 @@
   width: 100vw;
   height: 100vh;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(40%, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(40%, 1fr));
   -moz-column-gap: 3px;
        column-gap: 3px;
   row-gap: 3px;
