@@ -95,6 +95,9 @@
 .login-container .login-form-container .login-form .form-content .radio-group input[type=radio]:checked + label img {
   background: url("../icons/radio-button-on.svg") no-repeat;
 }
+.login-container .login-form-container .login-form .form-content .radio-group input[type=radio]:focus + label img {
+  background: url("../icons/radio-button-on.svg") no-repeat;
+}
 .login-container .login-form-container .login-form .form-content .radio-group .radio-btn label {
   font-family: "Quicksand-Medium";
   display: inline-flex;
@@ -167,6 +170,10 @@
   text-align: right;
   font-family: "Quicksand-Medium";
 }
+.login-container .login-form-container .login-form .form-content .user-details a:focus {
+  outline: none;
+  text-decoration: underline;
+}
 .login-container .login-form-container .login-form .form-content .user-details .user-detail:first-child {
   margin-bottom: 33px;
 }
@@ -185,7 +192,8 @@
   margin-bottom: 32px;
 }
 .login-container .login-form-container .login-form .form-content .remember-div .check_box {
-  display: none;
+  width: 0;
+  opacity: 0;
 }
 .login-container .login-form-container .login-form .form-content .remember-div .check_box + label {
   background: url("../icons/checkbox-unchecked.svg") no-repeat;
@@ -195,6 +203,9 @@
 }
 .login-container .login-form-container .login-form .form-content .remember-div .check_box:checked + label {
   background: url("../icons/checkbox-checked.svg") no-repeat;
+}
+.login-container .login-form-container .login-form .form-content .remember-div .check_box:focus + label {
+  border: 1px solid #202020;
 }
 .login-container .login-form-container .login-form .form-content .submit-Btn {
   width: 100%;

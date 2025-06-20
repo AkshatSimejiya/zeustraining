@@ -87,6 +87,8 @@ var alerts = [
 ];
 var passwordField = document.getElementById("password");
 var togglePassword = document.querySelector(".password-toggle-icon img");
+var togglePass = document.querySelector(".password-toggle-icon");
+var toggleRemember = document.querySelector('.check_box');
 console.log("Build using ts");
 if (togglePassword) {
     togglePassword.addEventListener("click", function () {
@@ -102,6 +104,26 @@ if (togglePassword) {
         }
     });
 }
+if (togglePass) {
+    togglePass.addEventListener("keydown", function (event) {
+        var keyboardEvent = event;
+        switch (keyboardEvent.key) {
+            case "ArrowDown":
+                passwordField.type = "text";
+                break;
+            case "ArrowUp":
+                passwordField.type = "password";
+                break;
+        }
+    });
+}
+var rememberBtn = document.getElementById('rememberBtn');
+rememberBtn.addEventListener('keydown', function (event) {
+    if (event.key === ' ' || event.key === 'Enter') {
+        event.preventDefault(); // Prevent the default action (scrolling)
+        rememberBtn.checked = !rememberBtn.checked; // Toggle the checkbox
+    }
+});
 var hamburger = document.querySelector('.hamburger');
 // Hamburger menu and other interactions
 if (hamburger) {

@@ -87,6 +87,12 @@
                                 background: url("../icons/radio-button-on.svg") no-repeat;
                             }
                         }
+
+                        &:focus + label {
+                            img{
+                                background: url("../icons/radio-button-on.svg") no-repeat;
+                            }
+                        }
                     }
 
                     .radio-btn{
@@ -166,9 +172,14 @@
                         width: 100%;
                         text-decoration: none;
                         color: #1F7A54;
-                        font-size: 14px;
+                        font-size: 14px;   
                         text-align: right;
-                        font-family: "Quicksand-Medium";    
+                        font-family: "Quicksand-Medium";
+                        
+                        &:focus {
+                            outline: none;
+                            text-decoration: underline;
+                        }
                     }
                     .user-detail:first-child {
                         margin-bottom: 33px;
@@ -192,7 +203,10 @@
                     margin-bottom: 32px;
 
                     .check_box {
-                        display:none;
+                        // display:none;
+                        // visibility: hidden;
+                        width: 0;
+                        opacity: 0;
                     }
 
                     .check_box + label{
@@ -204,6 +218,10 @@
 
                     .check_box:checked + label{
                         background:url('../icons/checkbox-checked.svg') no-repeat;
+                    }
+
+                    .check_box:focus + label {
+                        border: 1px solid #202020;
                     }
                 }
 

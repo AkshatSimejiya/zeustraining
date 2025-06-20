@@ -11,25 +11,25 @@
     
     <div class="login-container">
         <header>
-            <a href="./index.html" class="logo-image">
-                <img src="./assets/icons/logo used in header.svg">
+            <a href="./index.html" class="logo-image" aria-label="Quantum Login Page" tabindex="0">
+                <img src="./assets/icons/logo used in header.svg" alt="Quantum">
             </a>
         </header>
 
         <div class="login-form-container">
             <div class="login-form">
                 <form>
-                    <div class="first-div-head"><button class="back-btn"><img src="./assets/icons/back.svg"></button> <h2>Log in with Quantum</h2></div>
+                    <div class="first-div-head"><button class="back-btn" aria-label="Back Button"><img src="./assets/icons/back.svg" alt="Back Button"></button> <h2>Log in with Quantum</h2></div>
 
                     <!-- Start of Form -->
                     <div class="form-content">
                         <div class="radio-group">
                             <div class="radio-btn">
-                                <input type="radio" id="district" name="type" value="district">
+                                <input type="radio" tabindex="0" id="district" name="type" value="district">
                                 <label for="district"><img src="./assets/icons/radio-button-off.svg" alt="Radio Button"> District</label><br>
                             </div>
                             <div class="radio-btn">
-                                <input type="radio" id="independentSchool" name="type" value="independentSchool">
+                                <input type="radio" tabindex="0" id="independentSchool" name="type" value="independentSchool">
                                 <label for="independentSchool"><img src="./assets/icons/radio-button-off.svg" alt="Radio Button"> Independent School</label><br>
                             </div>
                         </div>
@@ -37,7 +37,7 @@
                         <div class="select-group">
                             <div>
                                 <label for="state">State*</label><br>
-                                <select name="state" id="state">
+                                <select name="state" id="state" aria-label="Select Menu for selection of State Use Arrow key up and down to navigate">
                                     <option value="alabama">Alabama</option>
                                     <option value="california">California</option>
                                     <option value="delaware">Delaware</option>
@@ -46,7 +46,7 @@
                             </div>
                             <div>
                                 <label for="district2">District*</label><br>
-                                <select name="district" id="district2">
+                                <select name="district" id="district2" aria-label="Select Menu for selection of District Use Arrow key up and down to navigate">
                                     <option value="alabamaschooldistrict">Alabama School District</option>
                                     <option value="californiaschooldistrict">California School District</option>
                                     <option value="delawareschooldistrict">Delaware School District</option>
@@ -62,13 +62,13 @@
                             </div>
                             <div class="user-detail">
                                 <input type="password" name="password" id="password" placeholder="Password*">
-                                <span class="password-toggle-icon"><img src="./assets/icons/preview.svg"></span>
+                                <span class="password-toggle-icon" role="Password Switch" aria-label="Toggle Password on or off" tabindex="0"><img alt="Toggle Password" src="./assets/icons/preview.svg"></span>
                                 <a href="./index.html">FORGOT PASSWORD?</a>
                             </div>
                         </div>
 
-                        <div class="remember-div">
-                            <input type="checkbox" name="remember" class="check_box" id="rememberBtn" checked>
+                        <div class="remember-div" >
+                            <input type="checkbox" tabindex="0" name="remember" class="check_box" id="rememberBtn" checked>
                             <label for="rememberBtn">Remember Me</label>
                         </div>
                         
@@ -87,8 +87,8 @@
         </div>
         
         <footer>
-            <a href="./index.html">
-                <img src="./assets/icons/logo used in footer.svg">
+            <a href="./index.html" aria-label="Quantum Login Page">
+                <img src="./assets/icons/logo used in footer.svg" alt="Quantum">
             </a>
 
             <div class="seperator"></div>

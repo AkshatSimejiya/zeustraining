@@ -123,7 +123,8 @@ const alerts: Alert[] = [
 
 const passwordField = <HTMLInputElement>document.getElementById("password");
 const togglePassword = document.querySelector(".password-toggle-icon img") ;
-
+const togglePass = document.querySelector(".password-toggle-icon")
+const toggleRemember = document.querySelector('.check_box')
 console.log("Build using ts")
 
 if(togglePassword){
@@ -140,10 +141,36 @@ if(togglePassword){
     });
 }
 
+if(togglePass){
+    togglePass.addEventListener("keydown",(event)=>{
+        console.log("Key Pressed")
+        const keyboardEvent = event as KeyboardEvent; 
+
+        switch(keyboardEvent.key){
+            case "ArrowDown":
+                passwordField.type = "text";
+                break;
+            case "ArrowUp":
+                passwordField.type = "password";
+                break;
+                
+        }
+    })
+}
+
+const rememberBtn = document.getElementById('rememberBtn') as HTMLInputElement;
+
+rememberBtn.addEventListener('keydown', (event: KeyboardEvent) => {
+    if (event.key === ' ' || event.key === 'Enter') {
+        event.preventDefault(); 
+        rememberBtn.checked = !rememberBtn.checked; 
+    }
+});
+
+
 const hamburger = document.querySelector('.hamburger') as HTMLElement;
 
 
-// Hamburger menu and other interactions
 if (hamburger) {
     const mobileMenuItems = document.querySelectorAll('.mobile-menu-item') as NodeListOf<HTMLElement>;
     const announcementContentDiv = document.querySelector('.announcement-div') as HTMLElement;
