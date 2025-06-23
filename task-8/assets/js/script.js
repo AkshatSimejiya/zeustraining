@@ -7,6 +7,6 @@ const container = document.getElementById("grid-container")
 
 const grid = new Grid(container)
 
-grid.render()
+grid.newCanvas()
 
-grid.fillCanvas()
+// grid.fillCanvas()
