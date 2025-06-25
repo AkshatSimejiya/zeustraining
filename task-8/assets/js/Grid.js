@@ -1,134 +1,87 @@
+class Grid {
+  constructor(container, cols = 100, rows = 100) {
+    this.container = container;
+    this.canvas = document.createElement('canvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.cellWidth = 100;
+    this.cellHeight = 25;
 
-import { Canvas } from "./Canvas.js";
+    this.cols = cols;
+    this.rows = rows;
 
+    this.data = new Data(cols, rows);
+    this.selection = new Selection();
+    this.undoRedo = new UndoRedo(this.data);
 
-export class Grid {
-    constructor(container){
-        this.container = container;
+    this.initCanvas();
+    this.bindEvents();
+    this.render();
+  }
 
-        this.isSelected = false;
+  initCanvas() {
+    this.canvas.width = this.cols * this.cellWidth;
+    this.canvas.height = this.rows * this.cellHeight;
 
-        this.dimensions = {
-            rowHeight : 24,
-            colWidth : 100
-        }
+    this.canvas.style.width = `${this.canvas.width}px`;
+    this.canvas.style.height = `${this.canvas.height}px`;
 
-        this.inputField = document.createElement("input")
-        this.inputField.setAttribute("type", "text");
-        this.inputField.setAttribute("id", "TextInput");
-        this.inputField.setAttribute("autocomplete","off");
-        this.inputField.style.display = "none";
-        this.inputField.value ="";
-        this.inputField.style.width = `${this.dimensions.colWidth}px`
-        this.inputField.style.height = `${this.dimensions.rowHeight}px`
-        this.container.appendChild(this.inputField)
+    this.container.appendChild(this.canvas);
+  }
 
-        
+  bindEvents() {
+    this.canvas.addEventListener('mousedown', (e) => this.selection.start(e, this));
+    this.canvas.addEventListener('mouseup', (e) => this.selection.end(e, this));
+    this.canvas.addEventListener('dblclick', (e) => this.editCell(e));
+  }
+
+  render() {
+    const ctx = this.ctx;
+    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    ctx.font = "14px sans-serif";
+    ctx.textBaseline = "middle";
+
+    for (let r = 0; r < this.rows; r++) {
+      for (let c = 0; c < this.cols; c++) {
+        const x = c * this.cellWidth;
+        const y = r * this.cellHeight;
+        const value = this.data.get(r, c);
+        ctx.strokeStyle = "#ccc";
+        ctx.strokeRect(x, y, this.cellWidth, this.cellHeight);
+        ctx.fillStyle = "#000";
+        ctx.fillText(value, x + 4, y + this.cellHeight / 2);
+      }
     }
 
-    newCanvas(){
-        const can1 = new Canvas(this.container, this.inputField, this.dimensions)
-        const can2 = new Canvas(this.container, this.inputField, this.dimensions)
-    }
+    this.selection.draw(ctx, this.cellWidth, this.cellHeight);
+  }
 
-    // render(){
-    //     this.canvas = document.createElement("canvas");
-    //     this.canvas.setAttribute("tabindex","0")
-    //     this.container.appendChild(this.canvas)
-    //     this.ctx = this.canvas.getContext("2d")
+  editCell(e) {
+    const rect = this.canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left + this.container.scrollLeft;
+    const y = e.clientY - rect.top + this.container.scrollTop;
 
-    //     this.canvas.width = this.cols * this.colWidth
-    //     this.canvas.height = this.rows * this.rowHeight
+    const col = Math.floor(x / this.cellWidth);
+    const row = Math.floor(y / this.cellHeight);
+    const oldVal = this.data.get(row, col);
 
-    //     this.canvas.addEventListener('click', this.onSelect.bind(this))
+    const input = document.createElement("input");
+    input.type = "text";
+    input.value = oldVal;
+    input.style.position = "absolute";
+    input.style.left = `${col * this.cellWidth}px`;
+    input.style.top = `${row * this.cellHeight}px`;
+    input.style.width = `${this.cellWidth}px`;
+    input.style.height = `${this.cellHeight}px`;
 
-    //     this.ctx.font = "18px sans-serif"
-    //     this.inputField.addEventListener("keydown", this.editCell.bind(this))
-    // }
+    this.container.appendChild(input);
+    input.focus();
 
-    // onSelect(event){
-
-    //     if(this.isSelected){
-
-    //         let x = this.selectedCell.col * this.colWidth;
-    //         let y = this.selectedCell.row * this.rowHeight;
-
-    //         this.ctx.strokeStyle = "#000000"
-    //         this.ctx.lineWidth = 1
-    //         this.ctx.clearRect(x, y, this.colWidth, this.rowHeight);
-    //         this.ctx.strokeRect(x, y, this.colWidth, this.rowHeight);
-            
-    //         if(this.inputField.value !== ""){
-    //             this.ctx.fillText(this.inputField.value, x+5, y+18)
-    //         }
-    //         this.isSelected = false;
-
-    //         this.inputField.style.display = "none";
-    //     }else {
-    //         let row = Math.floor(event.y / this.rowHeight);
-    //         let col = Math.floor(event.x / this.colWidth);
-    //         console.log(`Row = ${row} , Col = ${col}`)
-
-    //         let y = row * this.rowHeight;
-    //         let x = col * this.colWidth;
-            
-    //         this.ctx.strokeStyle = "#258f41"
-    //         this.ctx.lineWidth = 3;
-    //         this.ctx.strokeRect(x,y, this.colWidth, this.rowHeight)
-
-    //         this.selectedCell.row = row
-    //         this.selectedCell.col = col
-            
-    //         this.inputField.value = ""
-
-        
-    //         this.inputField.style.display = "block";
-
-    //         this.inputField.style.top = `${y}px`;
-    //         this.inputField.style.left = `${x}px`;
-        
-    //         this.inputField.focus()
-
-
-    //         this.isSelected = true
-    //     }
-    // }
-
-    // editCell(event) {
-    //     if(this.isSelected){
-            
-    //         let x = this.selectedCell.col * this.colWidth;
-    //         let y = this.selectedCell.row * this.rowHeight;
-
-
-    //         if(event.key === "Enter" || event.key === "Escape"){
-
-    //             this.ctx.strokeStyle = "#000000"
-    //             this.ctx.lineWidth = 1
-    //             this.ctx.clearRect(x, y, this.colWidth, this.rowHeight);
-    //             this.ctx.strokeRect(x, y, this.colWidth, this.rowHeight);
-                
-    //             if(this.inputField.value !== ""){
-    //                 this.ctx.fillText(this.inputField.value, x+5, y+18)
-    //             }
-    //             this.isSelected = false;
-
-    //             this.inputField.blur()
-
-    //             this.inputField.style.display = "none";
-    //         }
-    //     }
-
-    //     console.log(event)
-    // }
-
-    // fillCanvas(){
-    //     for (let row = 0; row < this.rows; row++) {        
-    //         for (let col = 0; col < this.cols; col++) {
-    //             const x = col * this.colWidth;
-    //             const y = row * this.rowHeight;
-    //             this.ctx.strokeRect(x, y, this.colWidth, this.rowHeight);
-    //         }
-    //     }
-    // }
+    input.addEventListener("blur", () => {
+      this.data.set(row, col, input.value);
+      this.undoRedo.push({ row, col, oldVal, newVal: input.value });
+      this.container.removeChild(input);
+      this.render();
+    });
+  }
 }

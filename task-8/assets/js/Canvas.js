@@ -38,7 +38,7 @@ export class Canvas{
             let y = this.selectedCell.row * this.rowHeight;
 
             this.ctx.strokeStyle = "#000000"
-            this.ctx.lineWidth = 1
+            this.ctx.lineWidth = 0.5
             this.ctx.clearRect(x, y, this.colWidth, this.rowHeight);
             this.ctx.strokeRect(x, y, this.colWidth, this.rowHeight);
             
@@ -57,7 +57,7 @@ export class Canvas{
             let x = col * this.colWidth;
             
             this.ctx.strokeStyle = "#258f41"
-            this.ctx.lineWidth = 3;
+            this.ctx.lineWidth = 1;
             this.ctx.strokeRect(x,y, this.colWidth, this.rowHeight)
 
             this.selectedCell.row = row
@@ -88,7 +88,7 @@ export class Canvas{
             if(event.key === "Enter" || event.key === "Escape"){
 
                 this.ctx.strokeStyle = "#000000"
-                this.ctx.lineWidth = 1
+                this.ctx.lineWidth = 0.5
                 this.ctx.clearRect(x, y, this.colWidth, this.rowHeight);
                 this.ctx.strokeRect(x, y, this.colWidth, this.rowHeight);
                 
