@@ -181,12 +181,12 @@ export class Canvas {
     renderDataTile(ctx) {
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(0, 0, this.tileWidth, this.tileHeight);
-        // ctx.lineWidth = 0.5
+        ctx.lineWidth = 1
 
         ctx.fillStyle = "#000";
         ctx.font = "12px Arial";
 
-        ctx.strokeStyle = "#ccc";
+        ctx.strokeStyle = "#d0d0d0";
         ctx.beginPath();
         const rows = Math.ceil(this.tileHeight / this.default_row_height);
         const cols = Math.ceil(this.tileWidth / this.default_col_width);
@@ -215,9 +215,9 @@ export class Canvas {
         ctx.fillStyle = "#000";
         ctx.font = "12px Arial";
         const rows = Math.ceil(this.tileHeight / this.default_row_height);
-        ctx.lineWidth = 0.5
+        ctx.lineWidth = 1
 
-        ctx.strokeStyle = "#ccc";
+        ctx.strokeStyle = "#d0d0d0";
         ctx.beginPath();
         ctx.fillStyle = "#000";
         for (let r = 0; r <= rows ; r++) {
@@ -238,7 +238,7 @@ export class Canvas {
     renderColHeaderTile(ctx, tileCol) {
         ctx.fillStyle = "#f0f0f0";
         ctx.fillRect(0, 0, this.tileWidth, this.header_height);
-        ctx.lineWidth = 0.5
+        ctx.lineWidth = 1
         ctx.fillStyle = "#000";
         ctx.font = "12px Arial";
         const cols = Math.ceil(this.tileWidth / this.default_col_width);
@@ -248,7 +248,7 @@ export class Canvas {
             ctx.fillText(this.columnLabel(labelIndex), x + 5, this.header_height / 2);
         }
 
-        ctx.strokeStyle = "#ccc";
+        ctx.strokeStyle = "#d0d0d0";
         ctx.beginPath();
         ctx.fillStyle = "#000";
         for (let c = 0; c <= cols ; c++) {

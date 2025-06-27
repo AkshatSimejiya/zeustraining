@@ -768,11 +768,14 @@ footer .copyrights-main p:nth-child(2) {
   display: flex;
   padding-bottom: 16px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  flex-wrap: wrap;
+  justify-content: center;
+  row-gap: 15px;
+  -moz-column-gap: 15px;
+       column-gap: 15px;
 }
 .dashboard-container .dashboard-content .dashboard-cards .dashboard-card .card-content .card-image {
-  max-width: 132px;
   height: auto;
-  margin-right: 16px;
 }
 .dashboard-container .dashboard-content .dashboard-cards .dashboard-card .card-content .card-image img {
   width: 100%;
@@ -782,6 +785,7 @@ footer .copyrights-main p:nth-child(2) {
   border-radius: 2px;
 }
 .dashboard-container .dashboard-content .dashboard-cards .dashboard-card .card-content .card-details {
+  flex-grow: 1;
   /* width: 100%; */
   width: 65%;
   position: relative;
@@ -989,7 +993,7 @@ footer .copyrights-main p:nth-child(2) {
     max-height: 500px;
   }
   .dashboard-container .dashboard-content .dashboard-cards {
-    grid-template-columns: repeat(auto-fill, 571px);
+    grid-template-columns: repeat(auto-fill, minmax(132px, 571px));
   }
   .hamburger {
     width: 30px;

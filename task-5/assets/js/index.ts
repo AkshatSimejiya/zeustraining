@@ -160,12 +160,14 @@ if(togglePass){
 
 const rememberBtn = document.getElementById('rememberBtn') as HTMLInputElement;
 
-rememberBtn.addEventListener('keydown', (event: KeyboardEvent) => {
-    if (event.key === ' ' || event.key === 'Enter') {
-        event.preventDefault(); 
-        rememberBtn.checked = !rememberBtn.checked; 
-    }
-});
+if(rememberBtn){
+    rememberBtn.addEventListener('keydown', (event: KeyboardEvent) => {
+        if (event.key === ' ' || event.key === 'Enter') {
+            event.preventDefault(); 
+            rememberBtn.checked = !rememberBtn.checked; 
+        }
+    });
+}
 
 
 const hamburger = document.querySelector('.hamburger') as HTMLElement;

@@ -106,6 +106,7 @@ if (togglePassword) {
 }
 if (togglePass) {
     togglePass.addEventListener("keydown", function (event) {
+        console.log("Key Pressed");
         var keyboardEvent = event;
         switch (keyboardEvent.key) {
             case "ArrowDown":
@@ -118,14 +119,15 @@ if (togglePass) {
     });
 }
 var rememberBtn = document.getElementById('rememberBtn');
-rememberBtn.addEventListener('keydown', function (event) {
-    if (event.key === ' ' || event.key === 'Enter') {
-        event.preventDefault(); // Prevent the default action (scrolling)
-        rememberBtn.checked = !rememberBtn.checked; // Toggle the checkbox
-    }
-});
+if (rememberBtn) {
+    rememberBtn.addEventListener('keydown', function (event) {
+        if (event.key === ' ' || event.key === 'Enter') {
+            event.preventDefault();
+            rememberBtn.checked = !rememberBtn.checked;
+        }
+    });
+}
 var hamburger = document.querySelector('.hamburger');
-// Hamburger menu and other interactions
 if (hamburger) {
     var mobileMenuItems = document.querySelectorAll('.mobile-menu-item');
     var announcementContentDiv_1 = document.querySelector('.announcement-div');

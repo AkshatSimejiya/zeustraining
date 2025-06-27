@@ -612,11 +612,16 @@ footer {
                     display: flex;
                     padding-bottom: 16px;
                     border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+                    flex-wrap: wrap;
+                    justify-content: center;
+                    row-gap: 15px;
+                    column-gap: 15px;
 
                     .card-image {
-                        max-width: 132px;
+                        // flex: 0 0 132px;
+                        // max-width: 132px;
                         height: auto;
-                        margin-right: 16px;
+                        // margin-right: 16px;
 
                          img {
                             width: 100%;
@@ -627,6 +632,10 @@ footer {
                     }
 
                     .card-details {
+                        flex-grow: 1;
+                        // flex: 1 1  auto; 
+                        // min-width: 200px;
+                        // max-width: 360px;
                         /* width: 100%; */
                         width: 65%;
                         position: relative;
@@ -802,11 +811,6 @@ footer {
                     #Path_1834 {
                         fill: #ffffff;
                     }
-
-                    // .menu-mobile {
-                    //     max-height: 500px;
-                    //     transition: max-height 0.3s ease-in;
-                    // }
                 }
             }
 
@@ -888,7 +892,7 @@ footer {
 
         .dashboard-content{
             .dashboard-cards {
-                grid-template-columns: repeat(auto-fill, 571px);
+                grid-template-columns: repeat(auto-fill, minmax(132px, 571px));
             }
         }
     }
