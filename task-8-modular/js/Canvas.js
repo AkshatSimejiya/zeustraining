@@ -1,3 +1,7 @@
+import { GridData } from "./GridData.js";
+import {Rows} from './Rows.js'
+import { Columns } from "./Columns.js";
+
 export class Canvas {
 
     /**
@@ -28,7 +32,8 @@ export class Canvas {
         this.selectedRow = null;
         this.selectedColumn = null;
 
-        this.cellData = new Map();
+        this.dataStore = new GridData();
+
         
         this.isResizing = false;
         this.resizeType = null;
@@ -36,7 +41,8 @@ export class Canvas {
         this.resizeStartPos = 0;
         this.resizeStartSize = 0;
         
-        this.rowHeights = new Map();
+        this.rowManager = new Rows(this.default_row_height);
+        this.colsManager = new Columns(this.default_col_width);
         this.colWidths = new Map();
 
         this.isEditing = false;
@@ -161,15 +167,6 @@ export class Canvas {
     }
 
     /**
-     * Get the height of a specific row
-     * @param {number} rowIndex 
-     * @returns {number} The height of the row
-     */
-    getRowHeight(rowIndex) {
-        return this.rowHeights.get(rowIndex) || this.default_row_height;
-    }
-
-    /**
      * Get the width of a specific column
      * @param {number} colIndex 
      * @returns {number} The width of the column
@@ -178,14 +175,6 @@ export class Canvas {
         return this.colWidths.get(colIndex) || this.default_col_width;
     }
 
-    /**
-     * Set the height of a row
-     * @param {number} rowIndex The index of the row 
-     * @param {number} height The returned height of the row
-     */
-    setRowHeight(rowIndex, height) {
-        this.rowHeights.set(rowIndex, Math.max(20, height));
-    }
 
     /**
      * Set width of the column
@@ -194,19 +183,6 @@ export class Canvas {
      */
     setColWidth(colIndex, width) {
         this.colWidths.set(colIndex, Math.max(50, width));
-    }
-
-    /**
-     * To get the position of the row
-     * @param {number} rowIndex The index of the row
-     * @returns {number} The position of the row which is calculated keeping the offset in mind
-     */
-    getRowPosition(rowIndex) {
-        let pos = 0;
-        for (let i = this.rowStart; i < rowIndex; i++) {
-            pos += this.getRowHeight(i);
-        }
-        return pos - this.scrollY;
     }
 
     /**
@@ -220,24 +196,6 @@ export class Canvas {
             pos += this.getColWidth(i);
         }
         return pos - this.scrollX;
-    }
-
-    /**
-     * Get the row at specific position
-     * @param {number} y the y position 
-     * @returns {number} the index of the row
-     */
-    getRowAtPosition(y) {
-        let currentY = -this.scrollY;
-        let rowIndex = this.rowStart;
-        
-        while (currentY < y) {
-            currentY += this.getRowHeight(rowIndex);
-            if (currentY > y) break;
-            rowIndex++;
-        }
-        
-        return rowIndex;
     }
 
     /**
@@ -265,7 +223,7 @@ export class Canvas {
     handleRowClick(e) {
         if (this.isResizing) return;
         
-        const rowIndex = this.getRowAtPosition(e.offsetY);
+        const rowIndex = this.rowManager.getRowAtPosition(this.rowStart, this.scrollY, e.offsetY);
         this.selectedRow = rowIndex;
         this.selectedColumn = null;
         this.selectedCell = null;
@@ -298,16 +256,17 @@ export class Canvas {
      */
     handleRowMouseDown(e) {
         const resizeThreshold = 3;
-        const rowIndex = this.getRowAtPosition(e.offsetY);
-        const rowY = this.getRowPosition(rowIndex);
-        const rowHeight = this.getRowHeight(rowIndex);
+        const rowIndex = this.rowManager.getRowAtPosition(this.rowStart, this.scrollY, e.offsetY);
+        console.log(this.rowStart, this.scrollY, rowIndex);
+        const rowY = this.rowManager.getRowPosition(this.rowStart, this.scrollY,rowIndex);
+        const rowHeight = this.rowManager.getRowHeight(rowIndex);
         
         if (Math.abs(e.offsetY - (rowY + rowHeight)) < resizeThreshold) {
             this.isResizing = true;
             this.resizeType = 'row';
             this.resizeIndex = rowIndex;
             this.resizeStartPos = e.clientY;
-            this.resizeStartSize = this.getRowHeight(rowIndex);
+            this.resizeStartSize = this.rowManager.getRowHeight(rowIndex);
             e.preventDefault();
         }
     }
@@ -330,7 +289,6 @@ export class Canvas {
             this.resizeStartSize = this.getColWidth(colIndex);
             e.preventDefault();
         }
-    
     }
 
     /**
@@ -343,7 +301,7 @@ export class Canvas {
         if (this.resizeType === 'row') {
             const deltaY = e.clientY - this.resizeStartPos;
             const newHeight = this.resizeStartSize + deltaY;
-            this.setRowHeight(this.resizeIndex, newHeight);
+            this.rowManager.setRowHeight(this.resizeIndex, newHeight);
         } else if (this.resizeType === 'column') {
             const deltaX = e.clientX - this.resizeStartPos;
             const newWidth = this.resizeStartSize + deltaX;
@@ -373,9 +331,10 @@ export class Canvas {
         if (this.isResizing) return;
         
         const resizeThreshold = 3;
-        const rowIndex = this.getRowAtPosition(e.offsetY);
-        const rowY = this.getRowPosition(rowIndex);
-        const rowHeight = this.getRowHeight(rowIndex);
+        const rowIndex = this.rowManager.getRowAtPosition(this.rowStart, this.scrollY, e.offsetY);
+        console.log(this.rowStart, this.scrollY, rowIndex);
+        const rowY = this.rowManager.getRowPosition(this.rowStart, this.scrollY, rowIndex);
+        const rowHeight = this.rowManager.getRowHeight(rowIndex);
         
         if (Math.abs(e.offsetY - (rowY + rowHeight)) < resizeThreshold) {
             this.rowcanvas.style.cursor = 'ns-resize';
@@ -409,7 +368,7 @@ export class Canvas {
      */
     handleCellClick(e) {
         const col = this.getColAtPosition(e.offsetX);
-        const row = this.getRowAtPosition(e.offsetY);
+        const row = this.rowManager.getRowAtPosition(this.rowStart, this.scrollY, e.offsetY);
 
         this.selectedCell = {
             row: row,
@@ -450,7 +409,7 @@ export class Canvas {
         
         this.removeInputElements();
 
-        const currentValue = this.cellData.get(`${row},${col}`) || '';
+        const currentValue = this.dataStore.get(`${row},${col}`) || '';
         
         let inputValue = '';
         if (initialKey === 'Delete' || initialKey === 'Backspace') {
@@ -473,9 +432,10 @@ export class Canvas {
         this.removeSelectionMarker();
 
         const x = this.getColPosition(col);
-        const y = this.getRowPosition(row);
+        console.log(this.rowStart, this.scrollY, row);
+        const y = this.rowManager.getRowPosition(this.rowStart, this.scrollY, row);
         const colWidth = this.getColWidth(col);
-        const rowHeight = this.getRowHeight(row);
+        const rowHeight = this.rowManager.getRowHeight(row);
 
         const marker = document.createElement("div");
         marker.className = "cell-marker";
@@ -510,10 +470,13 @@ export class Canvas {
      */
     createCellInput(row, col, initialValue) {
         const x = this.getColPosition(col);
-        const y = this.getRowPosition(row);
+        console.log(this.rowStart, this.scrollY, row);
+        const y = this.rowManager.getRowPosition(this.rowStart, this.scrollY, row);
         const colWidth = this.getColWidth(col);
-        const rowHeight = this.getRowHeight(row);
+        const rowHeight = this.rowManager.getRowHeight(row);
 
+        console.log(y)
+        console.log(this.rowManager.getRowHeight(row))
         const input = document.createElement("input");
         input.className = "cell-editor";
         input.type = "text";
@@ -534,7 +497,7 @@ export class Canvas {
         this.gridContainer.appendChild(input);
 
         input.focus();
-        if (initialValue === this.cellData.get(`${row},${col}`)) {
+        if (initialValue === this.dataStore.get(row, col)) {
             input.select();
         } else {
             input.setSelectionRange(initialValue.length, initialValue.length);
@@ -568,9 +531,9 @@ export class Canvas {
         const key = `${row},${col}`;
         
         if (trimmedValue) {
-            this.cellData.set(key, trimmedValue);
+            this.dataStore.set(row, col, trimmedValue);
         } else {
-            this.cellData.delete(key);
+            this.dataStore.delete(row, col);
         }
         
         this.isEditing = false;
@@ -625,11 +588,8 @@ export class Canvas {
      * @param {WheelEvent} e The wheel event
      */
     updatedScroll(e){
-        console.log(e);
         const delta = e.deltaY;
 
-        console.log(`Scroll start : ${this.scrollY}, ${this.scrollX}`);
-        console.log(`Scroll start Rows and Cols: ${this.rowStart}, ${this.colStart}`);
         if (e.shiftKey) {
             let adjustedDelta = delta * 0.2;
             this.scrollX += adjustedDelta;
@@ -650,14 +610,14 @@ export class Canvas {
         } else {
             this.scrollY += delta;
 
-            while (this.scrollY >= this.getRowHeight(this.rowStart)) {
-                this.scrollY -= this.getRowHeight(this.rowStart);
+            while (this.scrollY >= this.rowManager.getRowHeight(this.rowStart)) {
+                this.scrollY -= this.rowManager.getRowHeight(this.rowStart);
                 this.rowStart++;
             }
 
-            while (this.scrollY <= -this.getRowHeight(this.rowStart - 1) && this.rowStart > 0) {
+            while (this.scrollY <= -this.rowManager.getRowHeight(this.rowStart - 1) && this.rowStart > 0) {
                 this.rowStart--;
-                this.scrollY += this.getRowHeight(this.rowStart);
+                this.scrollY += this.rowManager.getRowHeight(this.rowStart);
             }
 
             if (this.rowStart === 0 && this.scrollY < 0) {
@@ -670,10 +630,6 @@ export class Canvas {
         } else {
             this.removeSelectionMarker();
         }
-
-        console.log("After Event")
-        console.log(`Scroll start : ${this.scrollY}, ${this.scrollX}`);
-        console.log(`Scroll start Rows and Cols: ${this.rowStart}, ${this.colStart}`);
 
         this.renderer();
     }
@@ -754,15 +710,13 @@ export class Canvas {
         let colIndex = this.colStart;
         
         while (currentY < this.viewPortHeight && rowIndex < this.rowStart + 100) {
-            const rowHeight = this.getRowHeight(rowIndex);
+            const rowHeight = this.rowManager.getRowHeight(rowIndex);
             if (currentY + rowHeight >= 0) {
                 visibleRows.push({ index: rowIndex, y: currentY, height: rowHeight });
             }
             currentY += rowHeight;
             rowIndex++;
         }
-
-        console.log(visibleRows);
         
         while (currentX < this.viewPortWidth && colIndex < this.colStart + 100) {
             const colWidth = this.getColWidth(colIndex);
@@ -773,7 +727,7 @@ export class Canvas {
             colIndex++;
         }
 
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 1 / window.devicePixelRatio;
         ctx.font = "12px Arial";
         ctx.strokeStyle = "#d0d0d0";
         ctx.fillStyle = "#000";
@@ -795,8 +749,7 @@ export class Canvas {
 
         for (let row of visibleRows) {
             for (let col of visibleCols) {
-                const key = `${row.index},${col.index}`;
-                const value = this.cellData.get(key);
+                const value = this.dataStore.get(row.index, col.index) || '';
                 if (value) {
                     const x = col.x + 5;
                     const y = row.y + row.height / 2 + 4;
@@ -828,7 +781,7 @@ export class Canvas {
 
             if (visRow && visCol) {
                 ctx.strokeStyle = "#147E43";
-                ctx.lineWidth = 2;
+                ctx.lineWidth = 2 / window.devicePixelRatio;
                 ctx.strokeRect(visCol.x + 0.5, visRow.y + 0.5, visCol.width, visRow.height);
             }
         }
@@ -844,8 +797,8 @@ export class Canvas {
                         ctx.fillRect(col.x, row.y, col.width, row.height);
                         
                         ctx.strokeStyle = "#147E43";
-                        ctx.lineWidth = 2;
-                        
+                        ctx.lineWidth = 2 / window.devicePixelRatio;
+
                         if (row.index === startRow) {
                             ctx.beginPath();
                             ctx.moveTo(col.x, row.y + 0.5);
@@ -876,8 +829,8 @@ export class Canvas {
                     }
                 }
             }
-            
-            ctx.lineWidth = 1;
+
+            ctx.lineWidth = 1 / window.devicePixelRatio;
             ctx.strokeStyle = "#d0d0d0";
         }
 
@@ -891,23 +844,22 @@ export class Canvas {
     renderRows(ctx){
         ctx.clearRect(0, 0, this.row_header_width, this.viewPortHeight);
         
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 1  / window.devicePixelRatio;
         ctx.font = "12px Arial"
         ctx.strokeStyle = "#d0d0d0";
         ctx.fillStyle = "#F5F5F5";
-        console.log(ctx.measureText(this.rowStart).width)
         ctx.fillRect(0, 0, this.row_header_width, this.viewPortHeight);
 
         let currentY = -this.scrollY;
         let rowIndex = this.rowStart;
-
-        console.log("Current Scoll Position ",currentY);
         
         ctx.beginPath();
         ctx.fillStyle = "#000";
-        
+        ctx.moveTo(this.row_header_width-0.5, 0);
+        ctx.lineTo(this.row_header_width-0.5, this.viewPortHeight);
         while (currentY < this.viewPortHeight && rowIndex < this.rowStart + 100) {
-            const rowHeight = this.getRowHeight(rowIndex);
+            const rowHeight = this.rowManager.getRowHeight(rowIndex);
+            
             if (currentY + rowHeight >= 0) {
                 if (this.selectedRow === rowIndex) {
                     ctx.fillStyle = "rgba(20, 126, 67, 0.3)";
@@ -916,8 +868,7 @@ export class Canvas {
                 }
                 
                 const label = rowIndex + 1;
-                
-                ctx.fillText(label, ((this.row_header_width-5)-ctx.measureText(label).width), currentY + rowHeight / 2 + 4);
+                ctx.fillText(label, 5, currentY + rowHeight / 2 + 4);
                 
                 ctx.moveTo(0, currentY + rowHeight + 0.5);
                 ctx.lineTo(this.row_header_width, currentY + rowHeight + 0.5);
@@ -938,7 +889,7 @@ export class Canvas {
     renderColumns(ctx){
         ctx.clearRect(0, 0, this.viewPortWidth, this.default_row_height);
         
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 1 / window.devicePixelRatio;
         ctx.font = "12px Arial"
         ctx.strokeStyle = "#d0d0d0";
         ctx.fillStyle = "#F5F5F5";
@@ -950,7 +901,8 @@ export class Canvas {
         
         ctx.beginPath();
         ctx.fillStyle = "#000";
-        
+        ctx.moveTo(0, this.default_row_height-0.5);
+        ctx.lineTo(this.viewPortWidth, this.default_row_height-0.5);
         while (currentX < this.viewPortWidth && colIndex < this.colStart + 100) {
             const colWidth = this.getColWidth(colIndex);
             
@@ -983,6 +935,18 @@ export class Canvas {
     renderCorner(ctx){
         ctx.fillStyle = "#F5F5F5";
         ctx.fillRect(0, 0, this.row_header_width, this.default_row_height);
+
+        ctx.lineWidth = 1 / window.devicePixelRatio;
+        ctx.beginPath();
+        ctx.fillStyle = "#000";
+        ctx.strokeStyle = "#d0d0d0";
+        ctx.moveTo(this.row_header_width-0.5, 0);
+        ctx.lineTo(this.row_header_width-0.5, this.default_row_height);
+
+        ctx.moveTo(0, this.default_row_height-0.5);
+        ctx.lineTo(this.row_header_width-0.5, this.default_row_height-0.5);
+        ctx.stroke();
+        ctx.closePath();
     }
 
     /**
@@ -991,7 +955,7 @@ export class Canvas {
      */
     handleCellMouseDown(e) {
         const col = this.getColAtPosition(e.offsetX);
-        const row = this.getRowAtPosition(e.offsetY);
+        const row = this.rowManager.getRowAtPosition(this.rowStart, this.scrollY, e.offsetY);
         
         if (!e.ctrlKey && !e.shiftKey) {
             this.selectedCell = { row: row, col: col };
@@ -1032,7 +996,7 @@ export class Canvas {
         if (!this.isSelecting) return;
         
         const col = this.getColAtPosition(e.offsetX);
-        const row = this.getRowAtPosition(e.offsetY);
+        const row = this.rowManager.getRowAtPosition(this.rowStart, this.scrollY, e.offsetY);
         
         this.selectionEnd = { row: row, col: col };
         this.selectedRange = {
@@ -1216,13 +1180,13 @@ export class Canvas {
         const totalRows = this.rowStart + 100;
         let totalHeight = 0;
         for (let i = 0; i < totalRows; i++) {
-            totalHeight += this.getRowHeight(i);
+            totalHeight += this.rowManager.getRowHeight(i);
         }
         
         const maxScroll = Math.max(0, totalHeight - this.gridContainer.clientHeight);
         const newScrollY = scrollRatio * maxScroll;
         
-        this.scrollY = newScrollY % this.getRowHeight(this.rowStart);
+        this.scrollY = newScrollY % this.rowManager.getRowHeight(this.rowStart);
         this.rowStart = Math.floor(newScrollY / this.default_row_height);
         
         this.vScrollThumb.style.top = thumbTop + 'px';
@@ -1264,7 +1228,7 @@ export class Canvas {
         const totalRows = Math.max(50, this.rowStart + 30);
         let totalHeight = 0;
         for (let i = 0; i < totalRows; i++) {
-            totalHeight += this.getRowHeight(i);
+            totalHeight += this.rowManager.getRowHeight(i);
         }
         
         const vThumbRatio = Math.min(1, visibleHeight / totalHeight);

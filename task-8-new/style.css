@@ -1,0 +1,32 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+
+#grid-container {
+    width: 100vw;
+    height: 100vh;
+    position: relative;   
+    overflow: hidden;
+}
+
+#grid-container canvas {
+    position: absolute;
+}
+
+/* .dummy {
+    width: 100vw;
+    height: 50vh;
+} */
+
+/* .overlayinput {
+    background-color: transparent;
+} */
+
+
+/* .mark-editor{
+    width: 8px;
+    height: 8px;
+    background-color: #147E43;
+    border: 3px solid #ffffff;
+} */
