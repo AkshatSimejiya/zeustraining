@@ -30,19 +30,15 @@ export class Grid {
             this.updateViewPort(e)
         })
 
-        this.gridContainer.addEventListener("click", (e) => {
-            this.updateClick(e);
-        });
-
-        this.gridContainer.addEventListener('mousedown', (e) => {
+        window.addEventListener('mousedown', (e) => {
             this.viewport.handleMouseDown(e);
         });
 
-        this.gridContainer.addEventListener('mousemove', (e) => {
+        window.addEventListener('mousemove', (e) => {
             this.viewport.handleMouseMove(e);
         });
 
-        this.gridContainer.addEventListener('mouseup', (e) => {
+        window.addEventListener('mouseup', (e) => {
             this.viewport.handleMouseUp(e);
         });
 
@@ -100,20 +96,20 @@ export class Grid {
         this.viewport.updateRenderer();
     }
     
-    updateClick(e){
-        const position = this.viewport.getGridPositionFromClick(e.clientX, e.clientY);
+    // updateClick(e){
+    //     const position = this.viewport.getGridPositionFromClick(e.clientX, e.clientY);
             
-        if (position.isHeader) {
-            if (position.isRowHeader) {
-                console.log(`Clicked on row header at (${position.x}, ${position.y})`);
-            } else if (position.isColHeader) {
-                console.log(`Clicked on column header at (${position.x}, ${position.y})`);
-            }
-        } else {
-            console.log(`Clicked on cell (${position.row}, ${position.col})`);
-            console.log(`Grid position: (${position.gridX}, ${position.gridY})`);
-            console.log(`Cell position: (${position.cellX.toFixed(2)}, ${position.cellY.toFixed(2)})`);
-        }
+    //     if (position.isHeader) {
+    //         if (position.isRowHeader) {
+    //             console.log(`Clicked on row header at (${position.x}, ${position.y})`);
+    //         } else if (position.isColHeader) {
+    //             console.log(`Clicked on column header at (${position.x}, ${position.y})`);
+    //         }
+    //     } else {
+    //         console.log(`Clicked on cell (${position.row}, ${position.col})`);
+    //         console.log(`Grid position: (${position.gridX}, ${position.gridY})`);
+    //         console.log(`Cell position: (${position.cellX.toFixed(2)}, ${position.cellY.toFixed(2)})`);
+    //     }
 
-    }   
+    // }   
 }

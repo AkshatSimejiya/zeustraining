@@ -17,6 +17,25 @@ export class Rows {
         return this.rowsData.get(rowIndex) || this.defaultRowHeight;
     }
 
+    getCumulativeHeightUntil(rowIndex) {
+        let height = 0;
+        for (let i = 0; i < rowIndex; i++) {
+            height += this.getRowHeight(i);
+        }
+        console.log("Cumulative height until row", rowIndex, "is", height);
+        return height;
+    }
+
+    // In your rows class
+    getCumulativeHeightBetween(startRow, endRow) {
+        let height = 0;
+        for (let i = startRow; i < endRow; i++) {
+            height += this.getRowHeight(i);
+        }
+        return height;
+    }
+
+
     /**
      * Set the height of a specific row
      * @param {number} rowIndex 

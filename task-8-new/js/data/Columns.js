@@ -57,6 +57,25 @@ export class Columns {
         
         return colIndex;
     }
+
+    getCumulativeWidthUntil(colIndex) {
+        let width = 0;
+        for (let i = 0; i < colIndex; i++) {
+            width += this.getColumnWidth(i);
+        }
+        return width;
+    }
+
+    // In your cols class  
+    getCumulativeWidthBetween(startCol, endCol) {
+        let width = 0;
+        for (let i = startCol; i < endCol; i++) {
+            width += this.getColumnWidth(i);
+        }
+        return width;
+    }
+
+
     getColumnAtAbsolutePosition(absoluteX) {
         let cumulativeWidth = 0;
         let col = 0;

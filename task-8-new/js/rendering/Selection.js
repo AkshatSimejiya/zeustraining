@@ -1,380 +1,37 @@
 export class Selection {
     constructor() {
-        this.selections = new Map(); // Store multiple selections
-        this.activeSelection = null; // Current active selection
-        this.selectionMode = 'cell'; // 'cell', 'row', 'column', 'range'
-        this.isSelecting = false; // Track if currently selecting
-        this.selectionStart = null; // Start point for range selection
-        this.selectionEnd = null; // End point for range selection
-        this.callbacks = {
-            onSelectionChange: null,
-            onSelectionStart: null,
-            onSelectionEnd: null
-        };
-    }
-
-    /**
-     * Selection types enum
-     */
-    static SELECTION_TYPES = {
-        CELL: 'cell',
-        ROW: 'row',
-        COLUMN: 'column',
-        RANGE: 'range',
-        MULTIPLE: 'multiple'
-    };
-
-    /**
-     * Set callback functions for selection events
-     * @param {string} event - Event name ('onSelectionChange', 'onSelectionStart', 'onSelectionEnd')
-     * @param {function} callback - Callback function
-     */
-    setCallback(event, callback) {
-        if (this.callbacks.hasOwnProperty(event)) {
-            this.callbacks[event] = callback;
-        }
-    }
-
-    /**
-     * Start a new selection
-     * @param {number} row - Row index
-     * @param {number} col - Column index
-     * @param {string} type - Selection type
-     * @param {boolean} extend - Whether to extend existing selection
-     * @param {boolean} toggle - Whether to toggle selection
-     */
-    startSelection(row, col, type = 'cell', extend = false, toggle = false) {
-        this.isSelecting = true;
-        this.selectionStart = { row, col };
-        this.selectionEnd = { row, col };
-        this.selectionMode = type;
-
-        if (!extend && !toggle) {
-            this.clearAllSelections();
-        }
-
-        const selectionId = this.generateSelectionId(row, col, type);
-        
-        if (toggle && this.selections.has(selectionId)) {
-            this.removeSelection(selectionId);
-        } else {
-            this.activeSelection = this.createSelection(row, col, type);
-            this.selections.set(selectionId, this.activeSelection);
-        }
-
-        if (this.callbacks.onSelectionStart) {
-            this.callbacks.onSelectionStart(this.activeSelection);
-        }
-
-        this.notifySelectionChange();
-    }
-
-    /**
-     * Update selection during drag/extend operations
-     * @param {number} row - Current row
-     * @param {number} col - Current column
-     */
-    updateSelection(row, col) {
-        if (!this.isSelecting || !this.activeSelection) return;
-
-        this.selectionEnd = { row, col };
-        
-        // Update the active selection based on type
-        switch (this.selectionMode) {
-            case 'cell':
-                this.activeSelection = this.createRangeSelection(
-                    this.selectionStart.row, this.selectionStart.col,
-                    row, col
-                );
-                break;
-            case 'row':
-                this.activeSelection = this.createRowSelection(
-                    Math.min(this.selectionStart.row, row),
-                    Math.max(this.selectionStart.row, row)
-                );
-                break;
-            case 'column':
-                this.activeSelection = this.createColumnSelection(
-                    Math.min(this.selectionStart.col, col),
-                    Math.max(this.selectionStart.col, col)
-                );
-                break;
-            case 'range':
-                this.activeSelection = this.createRangeSelection(
-                    this.selectionStart.row, this.selectionStart.col,
-                    row, col
-                );
-                break;
-        }
-
-        // Update the selection in the map
-        const selectionId = this.generateSelectionId(
-            this.selectionStart.row, this.selectionStart.col, this.selectionMode
-        );
-        this.selections.set(selectionId, this.activeSelection);
-
-        this.notifySelectionChange();
-    }
-
-    /**
-     * End the current selection
-     */
-    endSelection() {
+        this.selections = [];
         this.isSelecting = false;
-        
-        if (this.callbacks.onSelectionEnd && this.activeSelection) {
-            this.callbacks.onSelectionEnd(this.activeSelection);
-        }
+        this.callbacks = {};
     }
 
     /**
-     * Select a single cell
-     * @param {number} row - Row index
-     * @param {number} col - Column index
-     * @param {boolean} extend - Whether to extend existing selection
-     * @param {boolean} toggle - Whether to toggle selection
+     * Select a range of cells with active cell tracking
      */
-    selectCell(row, col, extend = false, toggle = false) {
-        this.startSelection(row, col, 'cell', extend, toggle);
-        this.endSelection();
-    }
-
-    /**
-     * Select an entire row
-     * @param {number} row - Row index
-     * @param {boolean} extend - Whether to extend existing selection
-     * @param {boolean} toggle - Whether to toggle selection
-     */
-    selectRow(row, extend = false, toggle = false) {
-        this.startSelection(row, 0, 'row', extend, toggle);
-        this.endSelection();
-    }
-
-    /**
-     * Select an entire column
-     * @param {number} col - Column index
-     * @param {boolean} extend - Whether to extend existing selection
-     * @param {boolean} toggle - Whether to toggle selection
-     */
-    selectColumn(col, extend = false, toggle = false) {
-        this.startSelection(0, col, 'column', extend, toggle);
-        this.endSelection();
-    }
-
-    /**
-     * Select a range of cells
-     * @param {number} startRow - Start row
-     * @param {number} startCol - Start column
-     * @param {number} endRow - End row
-     * @param {number} endCol - End column
-     * @param {boolean} extend - Whether to extend existing selection
-     */
-    selectRange(startRow, startCol, endRow, endCol, extend = false) {
-        if (!extend) {
+    selectRange(startRow, startCol, endRow, endCol, preserveExisting = false, activeRow = null, activeCol = null) {
+        if (!preserveExisting) {
             this.clearAllSelections();
         }
 
-        const selection = this.createRangeSelection(startRow, startCol, endRow, endCol);
-        const selectionId = this.generateSelectionId(startRow, startCol, 'range');
-        
-        this.selections.set(selectionId, selection);
-        this.activeSelection = selection;
-        this.notifySelectionChange();
-    }
-
-    /**
-     * Create a single cell selection object
-     */
-    createSelection(row, col, type) {
-        switch (type) {
-            case 'cell':
-                return {
-                    type: 'cell',
-                    startRow: row,
-                    startCol: col,
-                    endRow: row,
-                    endCol: col,
-                    cells: [{ row, col }]
-                };
-            case 'row':
-                return this.createRowSelection(row, row);
-            case 'column':
-                return this.createColumnSelection(col, col);
-            default:
-                return this.createSelection(row, col, 'cell');
-        }
-    }
-
-    /**
-     * Create a row selection object
-     */
-    createRowSelection(startRow, endRow) {
-        return {
-            type: 'row',
-            startRow: Math.min(startRow, endRow),
-            endRow: Math.max(startRow, endRow),
-            startCol: 0,
-            endCol: Infinity, // Represents entire row
-            isFullRow: true
-        };
-    }
-
-    /**
-     * Create a column selection object
-     */
-    createColumnSelection(startCol, endCol) {
-        return {
-            type: 'column',
-            startRow: 0,
-            endRow: Infinity, // Represents entire column
-            startCol: Math.min(startCol, endCol),
-            endCol: Math.max(startCol, endCol),
-            isFullColumn: true
-        };
-    }
-
-    /**
-     * Create a range selection object
-     */
-    createRangeSelection(startRow, startCol, endRow, endCol) {
+        // Ensure start is top-left and end is bottom-right
         const minRow = Math.min(startRow, endRow);
         const maxRow = Math.max(startRow, endRow);
         const minCol = Math.min(startCol, endCol);
         const maxCol = Math.max(startCol, endCol);
 
-        const cells = [];
-        for (let r = minRow; r <= maxRow; r++) {
-            for (let c = minCol; c <= maxCol; c++) {
-                cells.push({ row: r, col: c });
-            }
-        }
-
-        return {
-            type: 'range',
+        const selection = {
             startRow: minRow,
             endRow: maxRow,
             startCol: minCol,
             endCol: maxCol,
-            cells: cells
+            activeRow: activeRow || startRow, // The cell where selection actually started
+            activeCol: activeCol || startCol,
+            type: 'cell'
         };
-    }
 
-    /**
-     * Generate a unique ID for a selection
-     */
-    generateSelectionId(row, col, type) {
-        return `${type}-${row}-${col}-${Date.now()}`;
-    }
-
-    /**
-     * Check if a cell is selected
-     * @param {number} row - Row index
-     * @param {number} col - Column index
-     * @returns {boolean} - True if cell is selected
-     */
-    isCellSelected(row, col) {
-        for (const selection of this.selections.values()) {
-            if (this.isInSelection(row, col, selection)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Check if a row is selected
-     * @param {number} row - Row index
-     * @returns {boolean} - True if row is selected
-     */
-    isRowSelected(row) {
-        for (const selection of this.selections.values()) {
-            if (selection.isFullRow && row >= selection.startRow && row <= selection.endRow) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Check if a column is selected
-     * @param {number} col - Column index
-     * @returns {boolean} - True if column is selected
-     */
-    isColumnSelected(col) {
-        for (const selection of this.selections.values()) {
-            if (selection.isFullColumn && col >= selection.startCol && col <= selection.endCol) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Check if a cell is within a selection
-     */
-    isInSelection(row, col, selection) {
-        return row >= selection.startRow && row <= selection.endRow &&
-               col >= selection.startCol && col <= selection.endCol;
-    }
-
-    /**
-     * Get all selected cells
-     * @returns {Array} - Array of {row, col} objects
-     */
-    getSelectedCells() {
-        const cells = [];
-        for (const selection of this.selections.values()) {
-            if (selection.cells) {
-                cells.push(...selection.cells);
-            } else {
-                // Generate cells for row/column selections
-                for (let r = selection.startRow; r <= selection.endRow; r++) {
-                    for (let c = selection.startCol; c <= selection.endCol; c++) {
-                        cells.push({ row: r, col: c });
-                    }
-                }
-            }
-        }
-        return cells;
-    }
-
-    /**
-     * Get all selections
-     * @returns {Array} - Array of selection objects
-     */
-    getAllSelections() {
-        return Array.from(this.selections.values());
-    }
-
-    /**
-     * Get the active selection
-     * @returns {Object|null} - Active selection object
-     */
-    getActiveSelection() {
-        return this.activeSelection;
-    }
-
-    /**
-     * Clear all selections
-     */
-    clearAllSelections() {
-        this.selections.clear();
-        this.activeSelection = null;
-        this.notifySelectionChange();
-    }
-
-    /**
-     * Remove a specific selection
-     * @param {string} selectionId - Selection ID to remove
-     */
-    removeSelection(selectionId) {
-        if (this.selections.has(selectionId)) {
-            this.selections.delete(selectionId);
-            if (this.activeSelection && this.activeSelection.id === selectionId) {
-                this.activeSelection = null;
-            }
-            this.notifySelectionChange();
-        }
+        this.selections.push(selection);
+        this.triggerCallback('onSelectionChange', this.selections);
+        return selection;
     }
 
     /**
@@ -398,34 +55,158 @@ export class Selection {
     }
 
     /**
-     * Notify listeners of selection changes
+     * Select a single cell
      */
-    notifySelectionChange() {
-        if (this.callbacks.onSelectionChange) {
-            this.callbacks.onSelectionChange(this.getAllSelections());
-        }
-    }
-
-    /**
-     * Serialize selections for saving/loading
-     * @returns {Object} - Serialized selections
-     */
-    serialize() {
-        return {
-            selections: Array.from(this.selections.entries()),
-            activeSelection: this.activeSelection,
-            selectionMode: this.selectionMode
+    selectCell(row, col) {
+        this.clearAllSelections();
+        
+        const selection = {
+            startRow: row,
+            endRow: row,
+            startCol: col,
+            endCol: col,
+            activeRow: row, // For single cell, active is the same as start
+            activeCol: col,
+            type: 'cell'
         };
+
+        this.selections.push(selection);
+        this.triggerCallback('onSelectionChange', this.selections);
+        return selection;
     }
 
     /**
-     * Deserialize selections from saved data
-     * @param {Object} data - Serialized selection data
+     * Check if the active selection is a range (more than one cell)
+     * @returns {boolean}
      */
-    deserialize(data) {
-        this.selections = new Map(data.selections);
-        this.activeSelection = data.activeSelection;
-        this.selectionMode = data.selectionMode;
-        this.notifySelectionChange();
+    isRangeSelection() {
+        const active = this.getActiveSelection();
+        if (!active) return false;
+
+        const isSingleRow = active.startRow === active.endRow;
+        const isSingleCol = active.startCol === active.endCol;
+
+        return !(isSingleRow && isSingleCol); // true if it's a range
+    }
+
+
+    /**
+     * Start a new selection (for mouse down)
+     */
+    startSelection(row, col, type = 'cell', preserveExisting = false, isMultiSelect = false) {
+        if (!preserveExisting) {
+            this.clearAllSelections();
+        }
+
+        const selection = {
+            startRow: row,
+            endRow: row,
+            startCol: col,
+            endCol: col,
+            activeRow: row, // Track where the selection started
+            activeCol: col,
+            type: type
+        };
+
+        this.selections.push(selection);
+        this.isSelecting = true;
+        this.triggerCallback('onSelectionChange', this.selections);
+        return selection;
+    }
+
+    /**
+     * Update current selection (for mouse drag)
+     */
+    updateSelection(row, col) {
+        if (this.selections.length === 0) return;
+
+        const currentSelection = this.selections[this.selections.length - 1];
+        
+        // Keep the original active cell, but update the range
+        const activeRow = currentSelection.activeRow;
+        const activeCol = currentSelection.activeCol;
+        
+        // Update the range based on active cell and current position
+        currentSelection.startRow = Math.min(activeRow, row);
+        currentSelection.endRow = Math.max(activeRow, row);
+        currentSelection.startCol = Math.min(activeCol, col);
+        currentSelection.endCol = Math.max(activeCol, col);
+
+        this.triggerCallback('onSelectionChange', this.selections);
+    }
+
+    /**
+     * End selection (for mouse up)
+     */
+    endSelection() {
+        this.isSelecting = false;
+    }
+
+    /**
+     * Add a new selection to existing ones
+     */
+    addSelection(row, col, type = 'cell') {
+        const selection = {
+            startRow: row,
+            endRow: row,
+            startCol: col,
+            endCol: col,
+            activeRow: row,
+            activeCol: col,
+            type: type
+        };
+
+        this.selections.push(selection);
+        this.triggerCallback('onSelectionChange', this.selections);
+        return selection;
+    }
+
+    /**
+     * Get the active selection (usually the last one)
+     */
+    getActiveSelection() {
+        return this.selections.length > 0 ? this.selections[this.selections.length - 1] : null;
+    }
+
+    /**
+     * Get all selections
+     */
+    getAllSelections() {
+        return this.selections;
+    }
+
+    /**
+     * Clear all selections
+     */
+    clearAllSelections() {
+        this.selections = [];
+        this.isSelecting = false;
+        this.triggerCallback('onSelectionChange', this.selections);
+    }
+
+    /**
+     * Check if a cell is selected
+     */
+    isCellSelected(row, col) {
+        return this.selections.some(sel => 
+            row >= sel.startRow && row <= sel.endRow &&
+            col >= sel.startCol && col <= sel.endCol
+        );
+    }
+
+    /**
+     * Set callback for selection changes
+     */
+    setCallback(eventName, callback) {
+        this.callbacks[eventName] = callback;
+    }
+
+    /**
+     * Trigger callback
+     */
+    triggerCallback(eventName, data) {
+        if (this.callbacks[eventName]) {
+            this.callbacks[eventName](data);
+        }
     }
 }
