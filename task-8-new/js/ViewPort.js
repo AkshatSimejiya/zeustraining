@@ -4,518 +4,13 @@ import {RowHeader} from "./rendering/RowHeader.js";
 import { CornerCanvas } from "./rendering/CornerCanvas.js";
 import { Selection } from "./rendering/Selection.js";
 
-
-// export class ViewPort {
-//     constructor(gridContainer, colInstance, rowsInstance){
-//         this.gridContainer = gridContainer;
-//         this.rows = rowsInstance;
-//         this.cols = colInstance;
-
-//         this.canvas = new Canvas(this.gridContainer, 25, 100,  this.cols, this.rows);
-//         this.rowCanvas = new RowHeader(this.gridContainer, 25, 100, this.cols, this.rows);
-//         this.colCanvas = new ColumnHeader(this.gridContainer,  25, 100, this.cols, this.rows);
-//         this.cornerCanvas = new CornerCanvas(this.gridContainer,  25, 100, this.cols, this.rows);
-
-//         this.absoluteScrollY = 0;
-//         this.absoluteScrollX = 0;
-        
-//         this.scroll = {
-//             scrollY: 0,
-//             scrollX: 0
-//         }
-//         this.rowStart = 0;
-//         this.colStart = 0;
-
-//         this.default_row_height = 25;
-//         this.default_col_width = 100;
-
-//         this.selection = new Selection();
-        
-//         this.isDragging = false;
-//         this.dragStartRow = -1;
-//         this.dragStartCol = -1;
-        
-//         this.selection.setCallback('onSelectionChange', (selections) => {
-//             this.onSelectionChange(selections);
-//         });
-//     }
-
-//     updateRenderer(){
-//         const selectionData = this.getSelectionForRendering();
-
-//         this.canvas.renderer(this.scroll.scrollX, this.scroll.scrollY, this.rowStart, this.colStart, selectionData);
-//         this.rowCanvas.renderer(this.scroll.scrollX, this.scroll.scrollY, this.rowStart, this.colStart, selectionData);
-//         this.colCanvas.renderer(this.scroll.scrollX, this.scroll.scrollY, this.rowStart, this.colStart, selectionData);
-//         this.cornerCanvas.renderer(this.scroll.scrollX, this.scroll.scrollY, this.rowStart, this.colStart, selectionData);
-//     }
-
-//     /**
-//      * Calculate which column starts at a given absolute X position
-//      */
-//     calculateColPosition(absoluteX) {
-//         if (this.cols && typeof this.cols.getColumnAtAbsolutePosition === 'function') {
-//             const result = this.cols.getColumnAtAbsolutePosition(absoluteX);
-//             return {
-//                 colStart: result.col,
-//                 scrollX: result.offsetX
-//             };
-//         }
-        
-//         return {
-//             colStart: Math.floor(absoluteX / this.default_col_width),
-//             scrollX: absoluteX % this.default_col_width
-//         };
-//     }
-
-//     updateScroll(e){
-//         const delta = e.deltaY * 0.3;
-
-//         if (e.shiftKey) {
-//             this.absoluteScrollX += delta;
-//             if (this.absoluteScrollX < 0) {
-//                 this.absoluteScrollX = 0;
-//             }
-
-//             const colPosition = this.calculateColPosition(this.absoluteScrollX);
-//             this.colStart = colPosition.colStart;
-//             this.scroll.scrollX = colPosition.scrollX;
-
-//         } else {
-//             this.absoluteScrollY += delta * 0.3;
-            
-//             if (this.absoluteScrollY < 0) {
-//                 this.absoluteScrollY = 0;
-//             }
-
-//             const rowPosition = this.rowCanvas.calculateRowPosition(this.absoluteScrollY);
-//             this.rowStart = rowPosition.rowStart;
-//             this.scroll.scrollY = rowPosition.scrollY;
-//         }
-
-//         // Update renderer with current selection
-//         this.updateRenderer();
-//     }
-
-//     setSelection(){
-//         this.isSelect = true;
-//         this.canvas.setSelection();
-//     }
-
-//     removeSelection(){
-//         this.canvas.removeSelection();
-//     }
-
-//     /**
-//      * Calculate row and column from click coordinates - FIXED VERSION
-//      */
-//     getGridPositionFromClick(clientX, clientY) {
-//         if(this.isSelect){
-//             this.removeSelection();
-//             this.isSelect = false;
-//             return
-//         }
-
-//         const rect = this.gridContainer.getBoundingClientRect();
-//         const containerX = clientX - rect.left;
-//         const containerY = clientY - rect.top;
-        
-//         const row_header_width = 30; 
-//         const col_header_height = 25;
-        
-//         const gridX = containerX - row_header_width;
-//         const gridY = containerY - col_header_height;
-        
-//         if (gridX < 0 || gridY < 0) {
-//             return {
-//                 row: -1,
-//                 col: -1,
-//                 x: containerX,
-//                 y: containerY,
-//                 isHeader: true,
-//                 isRowHeader: containerX < row_header_width,
-//                 isColHeader: containerY < col_header_height
-//             };
-//         }
-        
-//         const absoluteGridX = gridX + this.absoluteScrollX;
-//         const absoluteGridY = gridY + this.absoluteScrollY;
-        
-//         let col;
-//         if (this.cols && typeof this.cols.getColumnAtAbsolutePosition === 'function') {
-//             const colResult = this.cols.getColumnAtAbsolutePosition(absoluteGridX);
-//             col = colResult.col;
-//         } else {
-//             col = Math.floor(absoluteGridX / this.default_col_width);
-//         }
-        
-//         let row;
-//         if (this.rows && typeof this.rows.getRowAtAbsolutePosition === 'function') {
-//             const rowResult = this.rows.getRowAtAbsolutePosition(absoluteGridY);
-//             row = rowResult.row;
-//         } else {
-//             let cumulativeHeight = 0;
-//             row = 0;
-//             while (cumulativeHeight + this.rows.getRowHeight(row) <= absoluteGridY) {
-//                 cumulativeHeight += this.rows.getRowHeight(row);
-//                 row++;
-//             }
-//         }
-        
-//         return {
-//             row: row,
-//             col: col,
-//             x: containerX,
-//             y: containerY,
-//             gridX: gridX,
-//             gridY: gridY,
-//             isHeader: false,
-//             absoluteGridX: absoluteGridX,
-//             absoluteGridY: absoluteGridY
-//         };
-//     }
-
-//     /**
-//      * Handle mouse down for selection start
-//      */
-//     handleMouseDown(e) {
-//         const position = this.getGridPositionFromClick(e.clientX, e.clientY);
-        
-//         console.log("Mouse down at:", position);
-        
-//         if (position.isHeader) {
-//             if (position.isRowHeader) {
-//                 this.selection.selectRow(position.row, e.ctrlKey, e.shiftKey);
-//             } else if (position.isColHeader) {
-//                 this.selection.selectColumn(position.col, e.ctrlKey, e.shiftKey);
-//             }
-//         } else {
-//             if (e.shiftKey && this.selection.getActiveSelection()) {
-//                 if(this.selection.isRangeSelection()) {
-//                     return
-//                 }
-//                 const active = this.selection.getActiveSelection();
-//                 this.selection.selectRange(
-//                     active.activeRow || active.startRow, 
-//                     active.activeCol || active.startCol,
-//                     position.row, position.col,
-//                     true,
-//                     active.activeRow || active.startRow,
-//                     active.activeCol || active.startCol
-//                 );
-//             } else {
-//                 if (e.ctrlKey) {
-//                     this.selection.addSelection(position.row, position.col, 'cell');
-//                 } else {
-//                     this.selection.clearAllSelections();
-//                     this.selection.startSelection(
-//                         position.row, position.col, 'cell',
-//                         false, false
-//                     );
-//                 }
-                
-//                 this.isDragging = true;
-//                 this.dragStartRow = position.row;
-//                 this.dragStartCol = position.col;
-//             }
-//         }
-//     }
-
-//     /**
-//      * Handle mouse move for selection drag
-//      */
-//     handleMouseMove(e) {
-//         if (this.isDragging && this.dragStartRow >= 0 && this.dragStartCol >= 0) {
-//             const position = this.getGridPositionFromClick(e.clientX, e.clientY);
-            
-//             if (!position.isHeader) {
-//                 this.selection.clearAllSelections();
-//                 this.selection.selectRange(
-//                     this.dragStartRow, this.dragStartCol,
-//                     position.row, position.col,
-//                     false,
-//                     this.dragStartRow,
-//                     this.dragStartCol
-//                 );
-//             }
-//         }
-//     }
-
-//     /**
-//      * Handle mouse up for selection end
-//      */
-//     handleMouseUp(e) {
-//         console.log("Selection is working at", this.selection);
-//         if (this.isDragging) {
-//             this.isDragging = false;
-//             this.dragStartRow = -1;
-//             this.dragStartCol = -1;
-//         }
-        
-//         if (this.selection.isSelecting) {
-//             this.selection.endSelection();
-//         }
-//     }
-
-//     /**
-//      * Handle keyboard shortcuts for selection
-//      */
-//     handleKeyDown(e) {
-//         const active = this.selection.getActiveSelection();
-//         if (!active) return;
-
-//         const currentActiveRow = active.activeRow || active.startRow;
-//         const currentActiveCol = active.activeCol || active.startCol;
-//         let newRow = currentActiveRow;
-//         let newCol = currentActiveCol;
-        
-//         if(this.selection.isRangeSelection()) {
-//             console.log("Range selection detected");
-            
-//             // Get the bounds of the current selection
-//             const minRow = active.startRow;
-//             const maxRow = active.endRow;
-//             const minCol = active.startCol;
-//             const maxCol = active.endCol;
-            
-//             switch (e.key) {
-//                 case 'Tab':
-//                     e.preventDefault();
-//                     if (e.shiftKey) {
-//                         // Shift+Tab: Move left, wrap to previous row's last column
-//                         if (currentActiveCol > minCol) {
-//                             newCol = currentActiveCol - 1;
-//                         } else {
-//                             // At first column, wrap to previous row's last column
-//                             if (currentActiveRow > minRow) {
-//                                 newRow = currentActiveRow - 1;
-//                                 newCol = maxCol;
-//                             } else {
-//                                 // At first row and first column, wrap to last row's last column
-//                                 newRow = maxRow;
-//                                 newCol = maxCol;
-//                             }
-//                         }
-//                     } else {
-//                         // Tab: Move right, wrap to next row's first column
-//                         if (currentActiveCol < maxCol) {
-//                             newCol = currentActiveCol + 1;
-//                         } else {
-//                             // At last column, wrap to next row's first column
-//                             if (currentActiveRow < maxRow) {
-//                                 newRow = currentActiveRow + 1;
-//                                 newCol = minCol;
-//                             } else {
-//                                 // At last row and last column, wrap to first row's first column
-//                                 newRow = minRow;
-//                                 newCol = minCol;
-//                             }
-//                         }
-//                     }
-//                     break;
-                    
-//                 case 'Enter':
-//                     e.preventDefault();
-//                     if (e.shiftKey) {
-//                         // Shift+Enter: Move up, wrap to previous column's last row
-//                         if (currentActiveRow > minRow) {
-//                             newRow = currentActiveRow - 1;
-//                         } else {
-//                             // At first row, wrap to previous column's last row
-//                             if (currentActiveCol > minCol) {
-//                                 newCol = currentActiveCol - 1;
-//                                 newRow = maxRow;
-//                             } else {
-//                                 // At first row and first column, wrap to last column's last row
-//                                 newCol = maxCol;
-//                                 newRow = maxRow;
-//                             }
-//                         }
-//                     } else {
-//                         // Enter: Move down, wrap to next column's first row
-//                         if (currentActiveRow < maxRow) {
-//                             newRow = currentActiveRow + 1;
-//                         } else {
-//                             // At last row, wrap to next column's first row
-//                             if (currentActiveCol < maxCol) {
-//                                 newCol = currentActiveCol + 1;
-//                                 newRow = minRow;
-//                             } else {
-//                                 // At last row and last column, wrap to first column's first row
-//                                 newCol = minCol;
-//                                 newRow = minRow;
-//                             }
-//                         }
-//                     }
-//                     break;
-                    
-//                 case 'ArrowUp':
-//                     if (e.shiftKey) {
-//                         // Extend selection upward
-//                         this.selection.selectRange(
-//                             minRow, minCol, maxRow, maxCol,
-//                             false,
-//                             Math.max(minRow, currentActiveRow - 1),
-//                             currentActiveCol
-//                         );
-//                     } else {
-//                         newRow = Math.max(minRow, currentActiveRow - 1);
-//                     }
-//                     break;
-                    
-//                 case 'ArrowDown':
-//                     if (e.shiftKey) {
-//                         // Extend selection downward
-//                         this.selection.selectRange(
-//                             minRow, minCol, maxRow, maxCol,
-//                             false,
-//                             Math.min(maxRow, currentActiveRow + 1),
-//                             currentActiveCol
-//                         );
-//                     } else {
-//                         newRow = Math.min(maxRow, currentActiveRow + 1);
-//                     }
-//                     break;
-                    
-//                 case 'ArrowLeft':
-//                     if (e.shiftKey) {
-//                         // Extend selection leftward
-//                         this.selection.selectRange(
-//                             minRow, minCol, maxRow, maxCol,
-//                             false,
-//                             currentActiveRow,
-//                             Math.max(minCol, currentActiveCol - 1)
-//                         );
-//                     } else {
-//                         newCol = Math.max(minCol, currentActiveCol - 1);
-//                     }
-//                     break;
-                    
-//                 case 'ArrowRight':
-//                     if (e.shiftKey) {
-//                         // Extend selection rightward
-//                         this.selection.selectRange(
-//                             minRow, minCol, maxRow, maxCol,
-//                             false,
-//                             currentActiveRow,
-//                             Math.min(maxCol, currentActiveCol + 1)
-//                         );
-//                     } else {
-//                         newCol = Math.min(maxCol, currentActiveCol + 1);
-//                     }
-//                     break;
-                    
-//                 case 'Escape':
-//                     this.selection.clearAllSelections();
-//                     return;
-                    
-//                 default:
-//                     return;
-//             }
-            
-//             // Update the active cell position within the range (for Tab and Enter)
-//             if ((e.key === 'Tab' || e.key === 'Enter') && (newRow !== currentActiveRow || newCol !== currentActiveCol)) {
-//                 // Keep the same selection range but update the active cell
-//                 this.selection.selectRange(
-//                     minRow, minCol, maxRow, maxCol,
-//                     false,
-//                     newRow, newCol
-//                 );
-//             } else if (e.key.startsWith('Arrow') && !e.shiftKey && (newRow !== currentActiveRow || newCol !== currentActiveCol)) {
-//                 // For arrow keys without shift, just move the active cell within the range
-//                 this.selection.selectRange(
-//                     minRow, minCol, maxRow, maxCol,
-//                     false,
-//                     newRow, newCol
-//                 );
-//             }
-            
-//         } else {
-//             // Single cell selection - existing logic
-//             switch (e.key) {
-//                 case 'ArrowUp':
-//                     newRow = Math.max(0, currentActiveRow - 1);
-//                     break;
-//                 case 'ArrowDown':
-//                 case 'Enter':
-//                     newRow = currentActiveRow + 1;
-//                     break;
-//                 case 'ArrowLeft':
-//                     newCol = Math.max(0, currentActiveCol - 1);
-//                     break;
-//                 case 'ArrowRight':
-//                 case 'Tab':
-//                     if (e.shiftKey) {
-//                         e.preventDefault();
-//                         newCol = Math.max(0, currentActiveCol - 1);
-//                     } else {
-//                         newCol = currentActiveCol + 1;
-//                     }
-//                     break;
-//                 case 'Escape':
-//                     this.selection.clearAllSelections();
-//                     return;
-//                 case 'a':
-//                     if (e.ctrlKey) {
-//                         e.preventDefault();
-//                         return;
-//                     }
-//                     break;
-//                 default:
-//                     return;
-//             }
-            
-//             if (newRow !== currentActiveRow || newCol !== currentActiveCol) {
-//                 if (e.shiftKey && e.key !== 'Tab') {
-//                     this.selection.selectRange(
-//                         currentActiveRow, currentActiveCol,
-//                         newRow, newCol,
-//                         false,
-//                         currentActiveRow,
-//                         currentActiveCol
-//                     );
-//                 } else {
-//                     this.selection.clearAllSelections();
-//                     this.selection.selectCell(newRow, newCol);
-//                 }
-//                 e.preventDefault();
-//             }
-//         }
-//     }
-
-//     /**
-//      * Called when selection changes
-//      */
-//     onSelectionChange(selections) {
-//         console.log('Selection changed:', selections);
-//         this.updateRenderer();
-//     }
-
-//     /**
-//      * Get current selection for rendering
-//      */
-//     getSelectionForRendering() {
-//         return {
-//             selections: this.selection.getAllSelections(),
-//             bounds: this.selection.getSelectionBounds(),
-//             isCellSelected: (row, col) => this.selection.isCellSelected(row, col),
-//             isRowSelected: (row) => this.selection.isRowSelected(row),
-//             isColumnSelected: (col) => this.selection.isColumnSelected(col)
-//         };
-//     }
-// }
-
-// import { Canvas } from "./rendering/Canvas.js"
-// import {ColumnHeader} from "./rendering/ColumnHeader.js";
-// import {RowHeader} from "./rendering/RowHeader.js";
-// import { CornerCanvas } from "./rendering/CornerCanvas.js";
-// import { Selection } from "./rendering/Selection.js";
-
-
 export class ViewPort {
     constructor(gridContainer, colInstance, rowsInstance){
         this.gridContainer = gridContainer;
         this.rows = rowsInstance;
         this.cols = colInstance;
+        
+        this.selection = new Selection();
 
         this.canvas = new Canvas(this.gridContainer, 25, 100,  this.cols, this.rows);
         this.rowCanvas = new RowHeader(this.gridContainer, 25, 100, this.cols, this.rows);
@@ -535,15 +30,19 @@ export class ViewPort {
         this.default_row_height = 25;
         this.default_col_width = 100;
 
-        this.selection = new Selection();
         
         this.isDragging = false;
         this.dragStartRow = -1;
         this.dragStartCol = -1;
         
+        this.inputBox = null;
+        this.isEditing = false;
+        this.editingCell = { row: -1, col: -1 };
+        
         this.selection.setCallback('onSelectionChange', (selections) => {
             this.onSelectionChange(selections);
         });
+
     }
 
     updateRenderer(){
@@ -553,6 +52,7 @@ export class ViewPort {
         this.rowCanvas.renderer(this.scroll.scrollX, this.scroll.scrollY, this.rowStart, this.colStart, selectionData);
         this.colCanvas.renderer(this.scroll.scrollX, this.scroll.scrollY, this.rowStart, this.colStart, selectionData);
         this.cornerCanvas.renderer(this.scroll.scrollX, this.scroll.scrollY, this.rowStart, this.colStart, selectionData);
+        
     }
 
     /**
@@ -573,8 +73,558 @@ export class ViewPort {
         };
     }
 
+    /**
+     * Create and show input box for cell editing
+     */
+    // In ViewPort.js, modify the createInputBox method to update the renderer after setting editing state
+
+    createInputBox(row, col, initialValue = '') {
+        // Remove existing input box if any
+        this.removeInputBox();
+        
+        // Calculate cell position
+        const cellPosition = this.getCellScreenPosition(row, col);
+        if (!cellPosition) {
+            console.warn('Could not get cell position for:', row, col);
+            return;
+        }
+        
+        // If no initial value provided, get current cell value
+        if (initialValue === '') {
+            initialValue = this.getCellValue(row, col);
+        }
+        
+        this.inputBox = document.createElement('input');
+        this.inputBox.type = 'text';
+        this.inputBox.value = initialValue;
+        this.inputBox.className = 'grid-cell-input';
+        
+        this.inputBox.style.position = 'absolute';
+        this.inputBox.style.left = `${cellPosition.x}px`;
+        this.inputBox.style.top = `${cellPosition.y}px`;
+        this.inputBox.style.width = `${cellPosition.width}px`;
+        this.inputBox.style.height = `${cellPosition.height}px`;
+        this.inputBox.style.border = '2px solid #147E43';
+        this.inputBox.style.outline = 'none';
+        this.inputBox.style.fontSize = '12px';
+        this.inputBox.style.padding = '2px 4px';
+        this.inputBox.style.zIndex = '1000';
+        this.inputBox.style.backgroundColor = 'white';
+        this.inputBox.style.boxSizing = 'border-box';
+        
+        this.inputBox.addEventListener('keydown', (e) => this.handleInputKeyDown(e));
+        this.inputBox.addEventListener('blur', () => this.handleInputBlur());
+        
+        this.gridContainer.appendChild(this.inputBox);
+        
+        this.inputBox.focus();
+        
+        if (initialValue.length === 1) {
+            this.inputBox.setSelectionRange(1, 1);
+        } else {
+            this.inputBox.select();
+        }
+        
+        this.isEditing = true;
+        this.editingCell = { row, col };
+        
+        this.updateRenderer();
+    }
+
+
+    /**
+     * Remove input box
+     */
+    removeInputBox() {
+        if (this.inputBox) {
+            this.inputBox.remove();
+            this.inputBox = null;
+            this.isEditing = false;
+            this.editingCell = { row: -1, col: -1 };
+            
+            this.updateRenderer();
+        }
+    }
+
+    getCellScreenPosition(row, col) {
+        const rect = this.gridContainer.getBoundingClientRect();
+        const rowHeaderWidth = 30;
+        const colHeaderHeight = 25;
+        
+        let cellAbsoluteX = 0;
+        if (this.cols && typeof this.cols.getColumnAtAbsolutePosition === 'function') {
+            for (let i = 0; i < col; i++) {
+                cellAbsoluteX += this.cols.getColumnWidth(i);
+            }
+        } else {
+            cellAbsoluteX = col * this.default_col_width;
+        }
+        
+        let cellAbsoluteY = 0;
+        for (let i = 0; i < row; i++) {
+            cellAbsoluteY += this.rows.getRowHeight(i);
+        }
+        
+        const screenX = cellAbsoluteX - this.absoluteScrollX + rowHeaderWidth;
+        const screenY = cellAbsoluteY - this.absoluteScrollY + colHeaderHeight;
+        
+        const cellWidth = this.cols ? this.cols.getColumnWidth(col) : this.default_col_width;
+        const cellHeight = this.rows.getRowHeight(row);
+        
+        const containerWidth = this.gridContainer.clientWidth;
+        const containerHeight = this.gridContainer.clientHeight;
+        
+        if (screenX < rowHeaderWidth || screenX >= containerWidth || 
+            screenY < colHeaderHeight || screenY >= containerHeight) {
+            return null;
+        }
+        
+        return {
+            x: screenX,
+            y: screenY,
+            width: Math.min(cellWidth, containerWidth - screenX),
+            height: Math.min(cellHeight, containerHeight - screenY)
+        };
+    }
+
+    moveToNextCellHorizontal(reverse = false) {
+        const { row, col } = this.editingCell;
+        let newRow = row;
+        let newCol = col;
+
+        if(!this.selection.isRangeSelection()) {
+            if (reverse) {
+                if (col > 0) {
+                    newCol = col;
+                } else {
+                    if (row > 0) {
+                        newRow = row - 1;
+                    newCol = Math.max(0, col);
+                }
+            }
+            }
+            this.selection.selectCell(newRow, newCol);
+        }
+        
+        this.scrollToCell(newRow, newCol);
+    }
+
+    handleInputKeyDown(e) {
+        if(this.selection.isRangeSelection()){
+            switch (e.key) {
+                case 'Enter':
+                    e.preventDefault();
+                    const { row, col } = this.editingCell;
+                    this.commitCellEdit();
+                    const newRow = row;
+                    this.scrollToCell(newRow, col);
+                    break;
+                case 'Escape':
+                    e.preventDefault();
+                    this.cancelCellEdit();
+                    break;
+                case 'Tab':
+                    e.preventDefault();
+                    this.moveToNextCellHorizontal(e.shiftKey);
+                    this.commitCellEdit();
+                    break;
+            }
+        }else {
+            switch (e.key) {
+                case 'Enter':
+                    e.preventDefault();
+                    const { row, col } = this.editingCell;
+                    this.commitCellEdit();
+                    const newRow = row;
+                    this.selection.selectCell(newRow, col);
+                    this.scrollToCell(newRow, col);
+                    break;
+                case 'Escape':
+                    e.preventDefault();
+                    this.cancelCellEdit();
+                    break;
+                case 'Tab':
+                    e.preventDefault();
+                    this.moveToNextCellHorizontal(e.shiftKey);
+                    this.commitCellEdit();
+                    break;
+                case 'ArrowUp':
+                case 'ArrowDown':
+                case 'ArrowLeft':
+                case 'ArrowRight':
+                    if (this.shouldHandleArrowKey(e)) {
+                        e.preventDefault();
+                        this.handleArrowNavigation(e.key);
+                    }
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Check if arrow key should be handled for navigation
+     */
+    shouldHandleArrowKey(e) {
+        const input = this.inputBox;
+        const cursorPos = input.selectionStart;
+        const textLength = input.value.length;
+        
+        switch (e.key) {
+            case 'ArrowLeft':
+                return cursorPos === 0;
+            case 'ArrowRight':
+                return cursorPos === textLength;
+            case 'ArrowUp':
+            case 'ArrowDown':
+                return true; // Always handle up/down
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * Handle arrow key navigation
+     */
+    handleArrowNavigation(key) {
+        const { row, col } = this.editingCell;
+        let newRow = row;
+        let newCol = col;
+        
+        
+        
+        this.commitCellEdit();
+
+        switch (key) {
+            case 'ArrowUp':
+                newRow = Math.max(0, row - 1);
+                break;
+            case 'ArrowDown':
+                newRow = row + 1;
+                break;
+            case 'ArrowLeft':
+                newCol = Math.max(0, col - 1);
+                break;
+            case 'ArrowRight':
+                newCol = col + 1;
+                break;
+        }
+        
+        if (newRow !== row || newCol !== col) {
+            this.selection.selectCell(newRow, newCol);
+            this.scrollToCell(newRow, newCol);
+            this.createInputBox(newRow, newCol);
+        }
+    }
+
+    /**
+     * Move to next cell after editing
+     */
+    moveToNextCell(reverse = false) {
+        const { row, col } = this.editingCell;
+        let newRow = row;
+        let newCol = col;
+        
+        if (reverse) {
+            // Move to previous cell
+            newRow = Math.max(0, row - 1);
+        } else {
+            // Move to next cell (Enter key behavior - move down)
+            newRow = row + 1;
+        }
+        
+        this.selection.selectCell(newRow, newCol);
+        this.scrollToCell(newRow, newCol);
+    }
+
+    /**
+     * Commit cell edit
+     */
+    commitCellEdit() {
+        
+        if (this.inputBox && this.isEditing) {
+            const value = this.inputBox.value;
+            const { row, col } = this.editingCell;
+            
+            
+            this.triggerCallback('onCellValueChange', { row, col, value });
+            
+            this.removeInputBox();
+        }
+    }
+
+    /**
+     * Cancel cell edit
+     */
+    cancelCellEdit() {
+        this.removeInputBox();
+    }
+
+    /**
+     * Handle input box blur
+     */
+    handleInputBlur() {
+        // Small delay to allow other events to process first
+        setTimeout(() => {
+            if (this.isEditing) {
+                this.commitCellEdit();
+            }
+        }, 100);
+    }
+
+    /**
+     * Set callback for events
+     */
+    setCallback(eventName, callback) {
+        if (!this.callbacks) {
+            this.callbacks = {};
+        }
+        this.callbacks[eventName] = callback;
+    }
+
+    /**
+     * Trigger callback
+     */
+    triggerCallback(eventName, data) {
+        if (this.callbacks && this.callbacks[eventName]) {
+            this.callbacks[eventName](data);
+        }
+    }
+
+    // Add this new method for double-click handling:
+    handleDoubleClick(e) {
+        const position = this.getGridPositionFromClick(e.clientX, e.clientY);
+        
+        if (!position.isHeader && position.row >= 0 && position.col >= 0) {
+            this.selection.selectCell(position.row, position.col);
+            this.createInputBox(position.row, position.col);
+        }
+    }
+
+    handleKeyDown(e) {
+        if (this.isEditing) {
+            return;
+        }
+        
+        const active = this.selection.getActiveSelection();
+        if (!active) return;
+        
+        if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+            const activeRow = active.activeRow || active.startRow;
+            const activeCol = active.activeCol || active.startCol;
+            
+            this.createInputBox(activeRow, activeCol, e.key);
+            e.preventDefault();
+            return;
+        }
+        
+        if (e.key === 'F2') {
+            const activeRow = active.activeRow || active.startRow;
+            const activeCol = active.activeCol || active.startCol;
+            const currentValue = this.getCellValue(activeRow, activeCol);
+            this.createInputBox(activeRow, activeCol, currentValue);
+            e.preventDefault();
+            return;
+        }
+        
+        if (e.key === 'Delete' || e.key === 'Backspace') {
+            const activeRow = active.activeRow || active.startRow;
+            const activeCol = active.activeCol || active.startCol;
+            this.triggerCallback('onCellValueChange', { row: activeRow, col: activeCol, value: '' });
+            this.updateRenderer();
+            e.preventDefault();
+            return;
+        }
+        
+        const currentActiveRow = active.activeRow || active.startRow;
+        const currentActiveCol = active.activeCol || active.startCol;
+        let newRow = currentActiveRow;
+        let newCol = currentActiveCol;
+        
+        if(this.selection.isRangeSelection()) {
+            const minRow = active.startRow;
+            const maxRow = active.endRow;
+            const minCol = active.startCol;
+            const maxCol = active.endCol;
+            
+            if (e.key.startsWith('Arrow')) {
+                e.preventDefault();
+                let newRow = currentActiveRow;
+                let newCol = currentActiveCol;
+                
+                switch (e.key) {
+                    case 'ArrowUp':
+                        newRow = Math.max(0, currentActiveRow - 1);
+                        break;
+                    case 'ArrowDown':
+                        newRow = currentActiveRow + 1;
+                        break;
+                    case 'ArrowLeft':
+                        newCol = Math.max(0, currentActiveCol - 1);
+                        break;
+                    case 'ArrowRight':
+                        newCol = currentActiveCol + 1;
+                        break;
+                }
+                
+                this.selection.clearAllSelections();
+                this.selection.selectCell(newRow, newCol);
+                
+                this.scrollToCell(newRow, newCol);
+                return;
+            }
+
+            switch (e.key) {
+                case 'Enter':
+                    e.preventDefault();
+                    if (e.shiftKey) {
+                        if (currentActiveRow > minRow) {
+                            newRow = currentActiveRow - 1;
+                        } else {
+                            if (currentActiveCol > minCol) {
+                                newCol = currentActiveCol - 1;
+                                newRow = maxRow;
+                            } else {
+                                newCol = maxCol;
+                                newRow = maxRow;
+                            }
+                        }
+                    } else {
+                        if (currentActiveRow < maxRow) {
+                            newRow = currentActiveRow + 1;
+                        } else {
+                            if (currentActiveCol < maxCol) {
+                                newCol = currentActiveCol + 1;
+                                newRow = minRow;
+                            } else {
+                                newCol = minCol;
+                                newRow = minRow;
+                            }
+                        }
+                    }
+                    break;
+                case 'Tab':
+                    e.preventDefault();
+                    if (e.shiftKey) {
+                        if (currentActiveCol > minCol) {
+                            newCol = currentActiveCol - 1;
+                        } else {
+                            if (currentActiveRow > minRow) {
+                                newRow = currentActiveRow - 1;
+                                newCol = maxCol;
+                            } else {
+                                newRow = maxRow;
+                                newCol = maxCol;
+                            }
+                        }
+                    } else {
+                        if (currentActiveCol < maxCol) {
+                            newCol = currentActiveCol + 1;
+                        } else {
+                            if (currentActiveRow < maxRow) {
+                                newRow = currentActiveRow + 1;
+                                newCol = minCol;
+                            } else {
+                                newRow = minRow;
+                                newCol = minCol;
+                            }
+                        }
+                    }
+                    break;
+                default:
+                    return;
+            }
+            
+            if (newRow !== currentActiveRow || newCol !== currentActiveCol) {
+                this.selection.selectRange(
+                    minRow, minCol, maxRow, maxCol,
+                    false,
+                    newRow, newCol
+                );
+                
+                this.scrollToCell(newRow, newCol);
+            }
+            
+        } else {
+            switch (e.key) {
+                case 'ArrowUp':
+                    newRow = Math.max(0, currentActiveRow - 1);
+                    break;
+                case 'ArrowDown':
+                    newRow = currentActiveRow + 1;
+                    break;
+                case 'Enter':
+                    if (e.shiftKey) {
+                        newRow = Math.max(0, currentActiveRow - 1);
+                    } else {
+                        newRow = currentActiveRow + 1;
+                    }
+                    break;
+                case 'ArrowLeft':
+                    newCol = Math.max(0, currentActiveCol - 1);
+                    break;
+                case 'ArrowRight':
+                    newCol = currentActiveCol + 1;
+                    break;
+                case 'Tab':
+                    e.preventDefault();
+                    if (e.shiftKey) {
+                        newCol = Math.max(0, currentActiveCol - 1);
+                    } else {
+                        newCol = currentActiveCol + 1;
+                    }
+                    break;
+                case 'a':
+                    if (e.ctrlKey) {
+                        e.preventDefault();
+                        return;
+                    }
+                    break;
+                default:
+                    return;
+            }
+            
+            if (newRow !== currentActiveRow || newCol !== currentActiveCol) {
+                if (e.shiftKey && e.key !== 'Tab') {
+                    this.selection.selectRange(
+                        currentActiveRow, currentActiveCol,
+                        newRow, newCol,
+                        false,
+                        currentActiveRow,
+                        currentActiveCol
+                    );
+                } else {
+                    this.selection.clearAllSelections();
+                    this.selection.selectCell(newRow, newCol);
+                }
+                
+                // Auto-scroll to keep active cell visible
+                this.scrollToCell(newRow, newCol);
+                e.preventDefault();
+            }
+        }
+    }
+
+    getCellValue(row, col) {
+        if (this.datastore) {
+            return this.datastore.getCellValue(row, col) || '';
+        }
+        return '';
+    }
+
+    setDatastore(datastore) {
+        this.datastore = datastore;
+
+        
+        this.canvas.setDatastore(this.datastore)
+    }
+
+
     updateScroll(e){
-        console.log("Scroll event:", e);
+
+        if(this.inputBox){
+            this.removeInputBox();
+        }
+
         const delta = e.deltaY * 0.3;
 
         if (e.shiftKey) {
@@ -599,8 +649,6 @@ export class ViewPort {
             this.scroll.scrollY = rowPosition.scrollY;
         }
 
-        // Update renderer with current selection
-        console.log("Updating renderer with scroll:", this.absoluteScrollX, this.absoluteScrollY);
         this.updateRenderer();
     }
 
@@ -717,10 +765,14 @@ export class ViewPort {
     /**
      * Handle mouse down for selection start
      */
+    // Modify your existing handleMouseDown method:
     handleMouseDown(e) {
-        const position = this.getGridPositionFromClick(e.clientX, e.clientY);
+        // If currently editing, commit the edit first
+        if (this.isEditing) {
+            this.commitCellEdit();
+        }
         
-        console.log("Mouse down at:", position);
+        const position = this.getGridPositionFromClick(e.clientX, e.clientY);
         
         if (position.isHeader) {
             if (position.isRowHeader && position.row >= 0) {
@@ -784,7 +836,6 @@ export class ViewPort {
      * Handle mouse up for selection end
      */
     handleMouseUp(e) {
-        console.log("Selection is working at", this.selection);
         if (this.isDragging) {
             this.isDragging = false;
             this.dragStartRow = -1;
@@ -793,182 +844,6 @@ export class ViewPort {
         
         if (this.selection.isSelecting) {
             this.selection.endSelection();
-        }
-    }
-
-    /**
-     * Handle keyboard shortcuts for selection
-     */
-    handleKeyDown(e) {
-        const active = this.selection.getActiveSelection();
-        if (!active) return;
-
-        const currentActiveRow = active.activeRow || active.startRow;
-        const currentActiveCol = active.activeCol || active.startCol;
-        let newRow = currentActiveRow;
-        let newCol = currentActiveCol;
-        
-        if(this.selection.isRangeSelection()) {
-            console.log("Range selection detected");
-            
-            // Get the bounds of the current selection
-            const minRow = active.startRow;
-            const maxRow = active.endRow;
-            const minCol = active.startCol;
-            const maxCol = active.endCol;
-            
-            switch (e.key) {
-                case 'Tab':
-                    e.preventDefault();
-                    if (e.shiftKey) {
-                        // Shift+Tab: Move left, wrap to previous row's last column
-                        if (currentActiveCol > minCol) {
-                            newCol = currentActiveCol - 1;
-                        } else {
-                            // At first column, wrap to previous row's last column
-                            if (currentActiveRow > minRow) {
-                                newRow = currentActiveRow - 1;
-                                newCol = maxCol;
-                            } else {
-                                // At first row and first column, wrap to last row's last column
-                                newRow = maxRow;
-                                newCol = maxCol;
-                            }
-                        }
-                    } else {
-                        // Tab: Move right, wrap to next row's first column
-                        if (currentActiveCol < maxCol) {
-                            newCol = currentActiveCol + 1;
-                        } else {
-                            // At last column, wrap to next row's first column
-                            if (currentActiveRow < maxRow) {
-                                newRow = currentActiveRow + 1;
-                                newCol = minCol;
-                            } else {
-                                // At last row and last column, wrap to first row's first column
-                                newRow = minRow;
-                                newCol = minCol;
-                            }
-                        }
-                    }
-                    break;
-                    
-                case 'Enter':
-                    e.preventDefault();
-                    if (e.shiftKey) {
-                        // Shift+Enter: Move up, wrap to previous column's last row
-                        if (currentActiveRow > minRow) {
-                            newRow = currentActiveRow - 1;
-                        } else {
-                            // At first row, wrap to previous column's last row
-                            if (currentActiveCol > minCol) {
-                                newCol = currentActiveCol - 1;
-                                newRow = maxRow;
-                            } else {
-                                // At first row and first column, wrap to last column's last row
-                                newCol = maxCol;
-                                newRow = maxRow;
-                            }
-                        }
-                    } else {
-                        // Enter: Move down, wrap to next column's first row
-                        if (currentActiveRow < maxRow) {
-                            newRow = currentActiveRow + 1;
-                        } else {
-                            // At last row, wrap to next column's first row
-                            if (currentActiveCol < maxCol) {
-                                newCol = currentActiveCol + 1;
-                                newRow = minRow;
-                            } else {
-                                // At last row and last column, wrap to first column's first row
-                                newCol = minCol;
-                                newRow = minRow;
-                            }
-                        }
-                    }
-                    break;
-                    
-                case 'Escape':
-                    this.selection.clearAllSelections();
-                    return;
-                    
-                default:
-                    return;
-            }
-            
-            // Update the active cell position within the range (for Tab and Enter)
-            if ((e.key === 'Tab' || e.key === 'Enter') && (newRow !== currentActiveRow || newCol !== currentActiveCol)) {
-                // Keep the same selection range but update the active cell
-                this.selection.selectRange(
-                    minRow, minCol, maxRow, maxCol,
-                    false,
-                    newRow, newCol
-                );
-                
-                // Auto-scroll to keep active cell visible
-                this.scrollToCell(newRow, newCol);
-            } else if (e.key.startsWith('Arrow') && !e.shiftKey && (newRow !== currentActiveRow || newCol !== currentActiveCol)) {
-                // For arrow keys without shift, just move the active cell within the range
-                this.selection.selectRange(
-                    minRow, minCol, maxRow, maxCol,
-                    false,
-                    newRow, newCol
-                );
-                
-                // Auto-scroll to keep active cell visible
-                this.scrollToCell(newRow, newCol);
-            }
-            
-        } else {
-            // Single cell selection - existing logic
-            switch (e.key) {
-                case 'ArrowUp':
-                    newRow = Math.max(0, currentActiveRow - 1);
-                    break;
-                case 'ArrowDown':
-                case 'Enter':
-                    newRow = currentActiveRow + 1;
-                    break;
-                case 'ArrowLeft':
-                    newCol = Math.max(0, currentActiveCol - 1);
-                    break;
-                case 'ArrowRight':
-                case 'Tab':
-                    if (e.shiftKey) {
-                        e.preventDefault();
-                        newCol = Math.max(0, currentActiveCol - 1);
-                    } else {
-                        newCol = currentActiveCol + 1;
-                    }
-                    break;
-                case 'a':
-                    if (e.ctrlKey) {
-                        e.preventDefault();
-                        return;
-                    }
-                    break;
-                default:
-                    return;
-            }
-            
-            if (newRow !== currentActiveRow || newCol !== currentActiveCol) {
-                if (e.shiftKey && e.key !== 'Tab') {
-                    this.selection.selectRange(
-                        currentActiveRow, currentActiveCol,
-                        newRow, newCol,
-                        false,
-                        currentActiveRow,
-                        currentActiveCol
-                    );
-                } else {
-                    this.selection.clearAllSelections();
-                    this.selection.selectCell(newRow, newCol);
-                }
-                
-                // Auto-scroll to keep active cell visible
-                this.scrollToCell(newRow, newCol);
-                e.preventDefault();
-            }
         }
     }
 
@@ -1043,7 +918,6 @@ export class ViewPort {
      * Called when selection changes
      */
     onSelectionChange(selections) {
-        console.log('Selection changed:', selections);
         this.updateRenderer();
     }
 
@@ -1057,13 +931,14 @@ export class ViewPort {
             isCellSelected: (row, col) => this.selection.isCellSelected(row, col),
             isRowSelected: (row) => this.selection.isRowSelected(row),
             isColumnSelected: (col) => this.selection.isColumnSelected(col),
-            // Add scroll offset information for rendering
             scrollOffsetX: this.scroll.scrollX,
             scrollOffsetY: this.scroll.scrollY,
             absoluteScrollX: this.absoluteScrollX,
             absoluteScrollY: this.absoluteScrollY,
             rowStart: this.rowStart,
-            colStart: this.colStart
+            colStart: this.colStart,
+            isEditing: this.isEditing
         };
     }
+
 }

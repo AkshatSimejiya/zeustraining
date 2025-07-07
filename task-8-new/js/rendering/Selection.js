@@ -59,7 +59,6 @@ export class Selection {
      */
     selectCell(row, col) {
         this.clearAllSelections();
-        
         const selection = {
             startRow: row,
             endRow: row,

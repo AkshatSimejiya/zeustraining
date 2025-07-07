@@ -15,7 +15,7 @@ export class Grid {
         this.selectionSet = new Selection();
 
         this.viewport = new ViewPort(this.gridContainer, this.cols, this.rows, this.selectionSet)
-
+        this.viewport.setDatastore(this.DataStore);
         this.init()
     }
 
@@ -42,13 +42,34 @@ export class Grid {
             this.viewport.handleMouseUp(e);
         });
 
-        // Keyboard events for selection
         window.addEventListener('keydown', (e) => {
             this.viewport.handleKeyDown(e);
         });
     
+        this.gridContainer.addEventListener('dblclick', (e) => {
+            this.viewport.handleDoubleClick(e);
+        });
 
-        // this.setupExampleRowHeights();
+
+        this.viewport.setCallback('onCellValueChange', (data) => {
+            const { row, col, value } = data;
+            
+            this.DataStore.setCellValue(row, col, value);
+            
+            this.viewport.updateRenderer();
+
+        });
+
+        this.DataStore.setCellValue(0, 0, 'Hello');
+        this.DataStore.setCellValue(0, 1, 'World');
+        this.DataStore.setCellValue(1, 0, '123');
+        this.DataStore.setCellValue(1, 1, '456');
+
+        
+
+        
+        this.viewport.updateRenderer();
+        this.setupExampleRowHeights();
 
     }
 
@@ -63,31 +84,6 @@ export class Grid {
         this.viewport.updateRenderer();
     }
 
-    /**
-     * Public method to change row height
-     */
-    // setRowHeight(rowIndex, height) {
-    //     this.rows.setRowHeight(rowIndex, height);
-    //     this.viewport.updateRenderer();
-    // }
-
-    /**
-     * Public method to get row height
-     */
-    // getRowHeight(rowIndex) {
-    //     return this.rows.getRowHeight(rowIndex);
-    // }
-
-    /**
-     * Scroll to a specific row
-     */
-    // scrollToRow(rowIndex) {
-    //     const absolutePosition = this.viewport.getAbsoluteRowPosition(rowIndex);
-    //     this.viewport.absoluteScrollY = absolutePosition;
-    //     this.viewport.calculateRowStart();
-    //     this.viewport.updateRenderer();
-    // }
-
     updateScroll(e){
         this.viewport.updateScroll(e);
     }
@@ -95,21 +91,4 @@ export class Grid {
     updateViewPort(e){
         this.viewport.updateRenderer();
     }
-    
-    // updateClick(e){
-    //     const position = this.viewport.getGridPositionFromClick(e.clientX, e.clientY);
-            
-    //     if (position.isHeader) {
-    //         if (position.isRowHeader) {
-    //             console.log(`Clicked on row header at (${position.x}, ${position.y})`);
-    //         } else if (position.isColHeader) {
-    //             console.log(`Clicked on column header at (${position.x}, ${position.y})`);
-    //         }
-    //     } else {
-    //         console.log(`Clicked on cell (${position.row}, ${position.col})`);
-    //         console.log(`Grid position: (${position.gridX}, ${position.gridY})`);
-    //         console.log(`Cell position: (${position.cellX.toFixed(2)}, ${position.cellY.toFixed(2)})`);
-    //     }
-
-    // }   
 }
