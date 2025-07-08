@@ -5,11 +5,21 @@ import { CornerCanvas } from "./rendering/CornerCanvas.js";
 import { Selection } from "./rendering/Selection.js";
 
 export class ViewPort {
+
+    /**
+     * Initialize the viewport for the grid
+     * @param {*} gridContainer the grid container
+     * @param {*} colInstance column instance
+     * @param {*} rowsInstance  rows instance
+     */
     constructor(gridContainer, colInstance, rowsInstance){
         this.gridContainer = gridContainer;
         this.rows = rowsInstance;
         this.cols = colInstance;
         
+        /**
+         * @type {Selection} The selection instance
+         */
         this.selection = new Selection();
 
         this.canvas = new Canvas(this.gridContainer, 25, 100,  this.cols, this.rows);
@@ -39,12 +49,19 @@ export class ViewPort {
         this.isEditing = false;
         this.editingCell = { row: -1, col: -1 };
         
+        this.autoScrollTimer = null;
+        this.autoScrollSpeed = 5;
+        this.autoScrollThreshold = 20;
+
         this.selection.setCallback('onSelectionChange', (selections) => {
             this.onSelectionChange(selections);
         });
 
     }
 
+    /**
+     * Update the canvas on changes
+     */
     updateRenderer(){
         const selectionData = this.getSelectionForRendering();
 
@@ -55,8 +72,19 @@ export class ViewPort {
         
     }
 
+    updateHeadersOnly(){
+        const selectionData = this.getSelectionForRendering();
+
+        this.rowCanvas.renderer(this.scroll.scrollX, this.scroll.scrollY, this.rowStart, this.colStart, selectionData);
+        this.colCanvas.renderer(this.scroll.scrollX, this.scroll.scrollY, this.rowStart, this.colStart, selectionData);
+        this.cornerCanvas.renderer(this.scroll.scrollX, this.scroll.scrollY, this.rowStart, this.colStart, selectionData);
+        
+    }
+
     /**
      * Calculate which column starts at a given absolute X position
+     * @param {*} absoluteX the absolute X position
+     * @returns {Object} an object containing colStart and scrollX
      */
     calculateColPosition(absoluteX) {
         if (this.cols && typeof this.cols.getColumnAtAbsolutePosition === 'function') {
@@ -74,22 +102,21 @@ export class ViewPort {
     }
 
     /**
-     * Create and show input box for cell editing
+     * Create an input box for editing cell values
+     * @param {*} row the row index of active cell
+     * @param {*} col the column index of active cell
+     * @param {*} initialValue the initial value for the input box
+     * @returns 
      */
-    // In ViewPort.js, modify the createInputBox method to update the renderer after setting editing state
-
     createInputBox(row, col, initialValue = '') {
-        // Remove existing input box if any
         this.removeInputBox();
         
-        // Calculate cell position
         const cellPosition = this.getCellScreenPosition(row, col);
         if (!cellPosition) {
             console.warn('Could not get cell position for:', row, col);
             return;
         }
         
-        // If no initial value provided, get current cell value
         if (initialValue === '') {
             initialValue = this.getCellValue(row, col);
         }
@@ -146,13 +173,19 @@ export class ViewPort {
         }
     }
 
+    /**
+     * Get the screen position of a cell
+     * @param {number} row  The row index of the cell
+     * @param {number} col The column index of the cell
+     * @returns The screen position of the cell
+     */
     getCellScreenPosition(row, col) {
         const rect = this.gridContainer.getBoundingClientRect();
         const rowHeaderWidth = 30;
         const colHeaderHeight = 25;
         
         let cellAbsoluteX = 0;
-        if (this.cols && typeof this.cols.getColumnAtAbsolutePosition === 'function') {
+        if (this.cols) {
             for (let i = 0; i < col; i++) {
                 cellAbsoluteX += this.cols.getColumnWidth(i);
             }
@@ -187,6 +220,10 @@ export class ViewPort {
         };
     }
 
+    /**
+     * Function to move to next cell on events like tab or right arrow
+     * @param {boolean} reverse if shift is presses, then it should be in reverse direction 
+     */
     moveToNextCellHorizontal(reverse = false) {
         const { row, col } = this.editingCell;
         let newRow = row;
@@ -209,6 +246,10 @@ export class ViewPort {
         this.scrollToCell(newRow, newCol);
     }
 
+    /**
+     * Handle input key down events 
+     * @param {event} e event object about the keydown on input
+     */
     handleInputKeyDown(e) {
         if(this.selection.isRangeSelection()){
             switch (e.key) {
@@ -262,7 +303,9 @@ export class ViewPort {
     }
 
     /**
-     * Check if arrow key should be handled for navigation
+     * Check if arrow key should be handled for navigation or not
+     * @param {*} e 
+     * @returns 
      */
     shouldHandleArrowKey(e) {
         const input = this.inputBox;
@@ -276,7 +319,7 @@ export class ViewPort {
                 return cursorPos === textLength;
             case 'ArrowUp':
             case 'ArrowDown':
-                return true; // Always handle up/down
+                return true;
             default:
                 return false;
         }
@@ -284,6 +327,7 @@ export class ViewPort {
 
     /**
      * Handle arrow key navigation
+     * @param {string} key The arrow key that was pressed
      */
     handleArrowNavigation(key) {
         const { row, col } = this.editingCell;
@@ -318,6 +362,7 @@ export class ViewPort {
 
     /**
      * Move to next cell after editing
+     * @param {boolean} reverse check if the shift key is pressed
      */
     moveToNextCell(reverse = false) {
         const { row, col } = this.editingCell;
@@ -325,10 +370,8 @@ export class ViewPort {
         let newCol = col;
         
         if (reverse) {
-            // Move to previous cell
             newRow = Math.max(0, row - 1);
         } else {
-            // Move to next cell (Enter key behavior - move down)
             newRow = row + 1;
         }
         
@@ -337,7 +380,7 @@ export class ViewPort {
     }
 
     /**
-     * Commit cell edit
+     * Commit the cell edit and trigger the callback
      */
     commitCellEdit() {
         
@@ -363,7 +406,6 @@ export class ViewPort {
      * Handle input box blur
      */
     handleInputBlur() {
-        // Small delay to allow other events to process first
         setTimeout(() => {
             if (this.isEditing) {
                 this.commitCellEdit();
@@ -390,7 +432,10 @@ export class ViewPort {
         }
     }
 
-    // Add this new method for double-click handling:
+    /**
+     * Add input on double click
+     * @param {*} e event to handle double click
+     */
     handleDoubleClick(e) {
         const position = this.getGridPositionFromClick(e.clientX, e.clientY);
         
@@ -400,6 +445,10 @@ export class ViewPort {
         }
     }
 
+    /**
+     * handle key down for navigation
+     * @param {*} e 
+     */
     handleKeyDown(e) {
         if (this.isEditing) {
             return;
@@ -597,13 +646,18 @@ export class ViewPort {
                     this.selection.selectCell(newRow, newCol);
                 }
                 
-                // Auto-scroll to keep active cell visible
                 this.scrollToCell(newRow, newCol);
                 e.preventDefault();
             }
         }
     }
 
+    /**
+     * Get the cell value
+     * @param {*} row rowindex of the cell needed
+     * @param {*} col colindex of the cell needed
+     * @returns 
+     */
     getCellValue(row, col) {
         if (this.datastore) {
             return this.datastore.getCellValue(row, col) || '';
@@ -611,6 +665,10 @@ export class ViewPort {
         return '';
     }
 
+    /**
+     * Set the datastore instance for canvas
+     * @param {DataStore} datastore object to set 
+     */
     setDatastore(datastore) {
         this.datastore = datastore;
 
@@ -619,13 +677,16 @@ export class ViewPort {
     }
 
 
+    /**
+     * Function to handle the scroll
+     * @param {*} e event object passed on wheel event
+     */
     updateScroll(e){
-
         if(this.inputBox){
             this.removeInputBox();
         }
 
-        const delta = e.deltaY * 0.3;
+        const delta = e.deltaY;
 
         if (e.shiftKey) {
             this.absoluteScrollX += delta;
@@ -652,17 +713,18 @@ export class ViewPort {
         this.updateRenderer();
     }
 
-    setSelection(){
-        this.isSelect = true;
-        this.canvas.setSelection();
-    }
-
+    /**
+     * Remove the selection
+     */
     removeSelection(){
         this.canvas.removeSelection();
     }
 
     /**
-     * Calculate row and column from click coordinates - FIXED VERSION
+     * Get the position and details about the cell where the user had clicked
+     * @param {*} clientX 
+     * @param {*} clientY 
+     * @returns {object} Object with details of the cell 
      */
     getGridPositionFromClick(clientX, clientY) {
         if(this.isSelect){
@@ -682,11 +744,9 @@ export class ViewPort {
         const gridY = containerY - col_header_height;
         
         if (gridX < 0 || gridY < 0) {
-            // Handle header clicks differently
             let headerRow = -1;
             let headerCol = -1;
             
-            // Calculate row for row header clicks
             if (containerX < row_header_width && containerY >= col_header_height) {
                 const absoluteGridY = gridY + this.absoluteScrollY;
                 if (this.rows && typeof this.rows.getRowAtAbsolutePosition === 'function') {
@@ -724,7 +784,6 @@ export class ViewPort {
             };
         }
         
-        // Fixed: Use current scroll position for absolute calculation
         const absoluteGridX = gridX + this.absoluteScrollX;
         const absoluteGridY = gridY + this.absoluteScrollY;
         
@@ -763,11 +822,10 @@ export class ViewPort {
     }
 
     /**
-     * Handle mouse down for selection start
+     * Handle mouse down event for selection and range
+     * @param {*} e event object passed from mousedown event
      */
-    // Modify your existing handleMouseDown method:
     handleMouseDown(e) {
-        // If currently editing, commit the edit first
         if (this.isEditing) {
             this.commitCellEdit();
         }
@@ -813,10 +871,17 @@ export class ViewPort {
     }
 
     /**
-     * Handle mouse move for selection drag
+     * Handle mouse move for range selection
+     * @param {event} e event object passed from mouse move
      */
     handleMouseMove(e) {
         if (this.isDragging && this.dragStartRow >= 0 && this.dragStartCol >= 0) {
+            const rect = this.gridContainer.getBoundingClientRect();
+            const containerX = e.clientX - rect.left;
+            const containerY = e.clientY - rect.top;
+            
+            this.handleAutoScroll(containerX, containerY);
+            
             const position = this.getGridPositionFromClick(e.clientX, e.clientY);
             
             if (!position.isHeader && position.row >= 0 && position.col >= 0) {
@@ -832,14 +897,194 @@ export class ViewPort {
         }
     }
 
+
     /**
-     * Handle mouse up for selection end
+     * Auto scroll on selection
+     * @param {number} containerX X coordinate for the grid container or the main grid
+     * @param {number} containerY Y coordinate of the grid container
+     */
+    handleAutoScroll(containerX, containerY) {
+        const containerWidth = this.gridContainer.clientWidth;
+        const containerHeight = this.gridContainer.clientHeight;
+        const rowHeaderWidth = 30;
+        const colHeaderHeight = 25;
+        
+        let scrollDirectionX = 0;
+        let scrollDirectionY = 0;
+        
+        if (containerX < rowHeaderWidth + this.autoScrollThreshold) {
+            scrollDirectionX = -1;
+        } else if (containerX > containerWidth - this.autoScrollThreshold) {
+            scrollDirectionX = 1;
+        }
+        
+        if (containerY < colHeaderHeight + this.autoScrollThreshold) {
+            scrollDirectionY = -1;
+        } else if (containerY > containerHeight - this.autoScrollThreshold) {
+            scrollDirectionY = 1;
+        }
+        
+        if (scrollDirectionX !== 0 || scrollDirectionY !== 0) {
+            this.startAutoScroll(scrollDirectionX, scrollDirectionY);
+        } else {
+            this.stopAutoScroll();
+        }
+    }
+
+    /**
+     * Start auto scroll animation 
+     * @param {number} directionX The X direction while scrolling
+     * @param {number} directionY The Y direction while scrolling
+     */
+    startAutoScroll(directionX, directionY) {
+        this.stopAutoScroll();
+        
+        const scroll = () => {
+            let scrolled = false;
+            
+            if (directionX !== 0) {
+                const newScrollX = this.absoluteScrollX + (directionX * this.autoScrollSpeed);
+                if (newScrollX >= 0) {
+                    this.absoluteScrollX = newScrollX;
+                    
+                    const colPosition = this.calculateColPosition(this.absoluteScrollX);
+                    this.colStart = colPosition.colStart;
+                    this.scroll.scrollX = colPosition.scrollX;
+                    scrolled = true;
+                }
+            }
+            
+            if (directionY !== 0) {
+                const newScrollY = this.absoluteScrollY + (directionY * this.autoScrollSpeed);
+                if (newScrollY >= 0) {
+                    this.absoluteScrollY = newScrollY;
+                    
+                    const rowPosition = this.rowCanvas.calculateRowPosition(this.absoluteScrollY);
+                    this.rowStart = rowPosition.rowStart;
+                    this.scroll.scrollY = rowPosition.scrollY;
+                    scrolled = true;
+                }
+            }
+            
+            if (scrolled) {
+                this.updateRenderer();
+                
+                if (this.isDragging) {
+                    this.autoScrollTimer = requestAnimationFrame(scroll);
+                }
+            }
+        };
+        
+        this.autoScrollTimer = requestAnimationFrame(scroll);
+    }
+
+    /**
+     * Get the resize info for resizing operaction
+     * @param {*} clientX 
+     * @param {*} clientY  
+     */
+    getResizeInfo(clientX, clientY) {
+        const rect = this.gridContainer.getBoundingClientRect();
+        const containerX = clientX - rect.left;
+        const containerY = clientY - rect.top;
+        
+        const rowHeaderWidth = 30;
+        const colHeaderHeight = 25;
+        const resizeThreshold = 3;
+        
+        if (containerY <= colHeaderHeight && containerX >= rowHeaderWidth) {
+            const gridX = containerX - rowHeaderWidth;
+            const absoluteGridX = gridX + this.absoluteScrollX;
+            
+            let currentX = 0;
+            let colIndex = 0;
+            
+            while (currentX < absoluteGridX) {
+                const colWidth = this.cols.getColumnWidth(colIndex);
+                const nextX = currentX + colWidth;
+                
+                if (Math.abs(absoluteGridX - nextX) <= resizeThreshold) {
+                    return {
+                        canResize: true,
+                        type: 'col',
+                        index: colIndex,
+                        borderPosition: nextX
+                    };
+                }
+                
+                currentX = nextX;
+                colIndex++;
+                
+                if (colIndex > 1000) break;
+            }
+        }
+        
+        if (containerX <= rowHeaderWidth && containerY >= colHeaderHeight) {
+            const gridY = containerY - colHeaderHeight;
+            const absoluteGridY = gridY + this.absoluteScrollY;
+            
+            let currentY = 0;
+            let rowIndex = 0;
+            
+            while (currentY < absoluteGridY) {
+                const rowHeight = this.rows.getRowHeight(rowIndex);
+                const nextY = currentY + rowHeight;
+                
+                if (Math.abs(absoluteGridY - nextY) <= resizeThreshold) {
+                    return {
+                        canResize: true,
+                        type: 'row',
+                        index: rowIndex,
+                        borderPosition: nextY
+                    };
+                }
+                
+                currentY = nextY;
+                rowIndex++;
+                
+                if (rowIndex > 1000) break;
+            }
+        }
+        
+        return {
+            canResize: false,
+            type: null,
+            index: -1
+        };
+    }
+
+    /**
+     * Check if the resize opertaion can be performed or now
+     * @param {number} clientX The x co-ordinate on container 
+     * @param {number} clientY The y co-ordinate on container
+     * @returns {boolean} Boolean to indicate if resizing is possible or not
+     */
+    isNearResizeBorder(clientX, clientY) {
+        const resizeInfo = this.getResizeInfo(clientX, clientY);
+        return resizeInfo.canResize;
+    }
+
+    /**
+     * Stop auto scrolling
+     */
+    stopAutoScroll() {
+        if (this.autoScrollTimer) {
+            cancelAnimationFrame(this.autoScrollTimer);
+            this.autoScrollTimer = null;
+        }
+    }
+
+    /**
+     * Handle Mouse Up to update the range selection 
+     * @param {event} e event passed while mouse up
      */
     handleMouseUp(e) {
         if (this.isDragging) {
             this.isDragging = false;
             this.dragStartRow = -1;
             this.dragStartCol = -1;
+            
+            this.stopAutoScroll();
         }
         
         if (this.selection.isSelecting) {
@@ -847,11 +1092,13 @@ export class ViewPort {
         }
     }
 
+
     /**
-     * Scroll to ensure a cell is visible
+     * Scroll to a particular cell
+     * @param {number} row Row index of that cell
+     * @param {number} col Col index of that cell
      */
     scrollToCell(row, col) {
-        // Calculate the absolute position of the target cell
         let targetAbsoluteY = 0;
         for (let i = 0; i < row; i++) {
             targetAbsoluteY += this.rows.getRowHeight(i);
@@ -859,7 +1106,6 @@ export class ViewPort {
         
         let targetAbsoluteX = 0;
         if (this.cols && typeof this.cols.getColumnAtAbsolutePosition === 'function') {
-            // If we have a column manager, use it to get the position
             for (let i = 0; i < col; i++) {
                 targetAbsoluteX += this.cols.getColumnWidth(i);
             }
@@ -867,41 +1113,32 @@ export class ViewPort {
             targetAbsoluteX = col * this.default_col_width;
         }
         
-        // Get viewport dimensions
-        const viewportHeight = this.gridContainer.clientHeight - 25; // minus header height
-        const viewportWidth = this.gridContainer.clientWidth - 30; // minus row header width
+        const viewportHeight = this.gridContainer.clientHeight - 25;
+        const viewportWidth = this.gridContainer.clientWidth - 30;
         
-        // Check if we need to scroll vertically
         const currentViewportTop = this.absoluteScrollY;
         const currentViewportBottom = this.absoluteScrollY + viewportHeight;
         const cellHeight = this.rows.getRowHeight(row);
         
         if (targetAbsoluteY < currentViewportTop) {
-            // Cell is above viewport, scroll up
             this.absoluteScrollY = targetAbsoluteY;
         } else if (targetAbsoluteY + cellHeight > currentViewportBottom) {
-            // Cell is below viewport, scroll down
             this.absoluteScrollY = targetAbsoluteY + cellHeight - viewportHeight;
         }
         
-        // Check if we need to scroll horizontally
         const currentViewportLeft = this.absoluteScrollX;
         const currentViewportRight = this.absoluteScrollX + viewportWidth;
         const cellWidth = this.cols ? this.cols.getColumnWidth(col) : this.default_col_width;
         
         if (targetAbsoluteX < currentViewportLeft) {
-            // Cell is left of viewport, scroll left
             this.absoluteScrollX = targetAbsoluteX;
         } else if (targetAbsoluteX + cellWidth > currentViewportRight) {
-            // Cell is right of viewport, scroll right
             this.absoluteScrollX = targetAbsoluteX + cellWidth - viewportWidth;
         }
         
-        // Ensure scroll positions are not negative
         this.absoluteScrollY = Math.max(0, this.absoluteScrollY);
         this.absoluteScrollX = Math.max(0, this.absoluteScrollX);
         
-        // Update scroll positions and row/col starts
         const rowPosition = this.rowCanvas.calculateRowPosition(this.absoluteScrollY);
         this.rowStart = rowPosition.rowStart;
         this.scroll.scrollY = rowPosition.scrollY;
@@ -910,19 +1147,20 @@ export class ViewPort {
         this.colStart = colPosition.colStart;
         this.scroll.scrollX = colPosition.scrollX;
         
-        // Update the renderer
         this.updateRenderer();
     }
 
     /**
-     * Called when selection changes
+     * onSelection change 
+     * @param {*} selections 
      */
     onSelectionChange(selections) {
         this.updateRenderer();
     }
 
     /**
-     * Get current selection for rendering
+     * Function to get the details of the selection 
+     * @returns {object}
      */
     getSelectionForRendering() {
         return {

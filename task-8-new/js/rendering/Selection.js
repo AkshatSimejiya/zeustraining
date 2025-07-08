@@ -35,16 +35,62 @@ export class Selection {
     }
 
     /**
+     * Select an entire row
+     */
+    selectRow(row, preserveExisting = false, extend = false) {
+        if (!preserveExisting) {
+            this.clearAllSelections();
+        }
+
+        const selection = {
+            startRow: row,
+            endRow: row,
+            startCol: 0,
+            endCol: Number.MAX_SAFE_INTEGER, // Select entire row
+            activeRow: row,
+            activeCol: 0,
+            type: 'row'
+        };
+
+        this.selections.push(selection);
+        this.triggerCallback('onSelectionChange', this.selections);
+        return selection;
+    }
+
+    /**
+     * Select an entire column
+     */
+    selectColumn(col, preserveExisting = false, extend = false) {
+        if (!preserveExisting) {
+            this.clearAllSelections();
+        }
+
+        const selection = {
+            startRow: 0,
+            endRow: Number.MAX_SAFE_INTEGER, // Select entire column
+            startCol: col,
+            endCol: col,
+            activeRow: 0,
+            activeCol: col,
+            type: 'column'
+        };
+
+        this.selections.push(selection);
+        this.triggerCallback('onSelectionChange', this.selections);
+        return selection;
+    }
+
+    /**
      * Get selection bounds for rendering
      * @returns {Object} - {minRow, maxRow, minCol, maxCol}
      */
     getSelectionBounds() {
-        if (this.selections.size === 0) return null;
+        if (this.selections.length === 0) return null;
 
         let minRow = Infinity, maxRow = -Infinity;
         let minCol = Infinity, maxCol = -Infinity;
 
-        for (const selection of this.selections.values()) {
+        for (const selection of this.selections) {
             minRow = Math.min(minRow, selection.startRow);
             maxRow = Math.max(maxRow, selection.endRow);
             minCol = Math.min(minCol, selection.startCol);
@@ -87,7 +133,6 @@ export class Selection {
 
         return !(isSingleRow && isSingleCol); // true if it's a range
     }
-
 
     /**
      * Start a new selection (for mouse down)
@@ -190,6 +235,24 @@ export class Selection {
         return this.selections.some(sel => 
             row >= sel.startRow && row <= sel.endRow &&
             col >= sel.startCol && col <= sel.endCol
+        );
+    }
+
+    /**
+     * Check if a row is selected
+     */
+    isRowSelected(row) {
+        return this.selections.some(sel => 
+            sel.type === 'row' && row >= sel.startRow && row <= sel.endRow
+        );
+    }
+
+    /**
+     * Check if a column is selected
+     */
+    isColumnSelected(col) {
+        return this.selections.some(sel => 
+            sel.type === 'column' && col >= sel.startCol && col <= sel.endCol
         );
     }
 

@@ -1,10 +1,11 @@
 export class Rows {
 
+    #rowsData;
     /**
      * Initialize the Row class to handle row operations.
      */
     constructor(defaultRowHeight = 25){
-        this.rowsData = new Map();
+        this.#rowsData = new Map();
         this.defaultRowHeight = defaultRowHeight;
     }
 
@@ -14,19 +15,28 @@ export class Rows {
      * @returns {number} The height of the row
      */
     getRowHeight(rowIndex) {
-        return this.rowsData.get(rowIndex) || this.defaultRowHeight;
+        return this.#rowsData.get(rowIndex) || this.defaultRowHeight;
     }
 
+    /**
+     * Get the cumulative height of rows until a specific index
+     * @param {number} rowIndex The row index 
+     * @returns {number} The cumulative height of rows until the specified index
+     */
     getCumulativeHeightUntil(rowIndex) {
         let height = 0;
         for (let i = 0; i < rowIndex; i++) {
             height += this.getRowHeight(i);
         }
-        console.log("Cumulative height until row", rowIndex, "is", height);
         return height;
     }
 
-    // In your rows class
+    /**
+     * Get the cumulative height of rows between two indices
+     * @param {number} startRow the starting row index
+     * @param {number} endRow the ending row index
+     * @returns {number} The cumulative height of rows between the specified indices
+     */
     getCumulativeHeightBetween(startRow, endRow) {
         let height = 0;
         for (let i = startRow; i < endRow; i++) {
@@ -42,7 +52,7 @@ export class Rows {
      * @param {number} height 
      */
     setRowHeight(rowIndex, height) {
-        this.rowsData.set(rowIndex, height);
+        this.#rowsData.set(rowIndex, height);
     }
 
     /**

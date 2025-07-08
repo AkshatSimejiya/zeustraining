@@ -1,6 +1,15 @@
 import { MainEngine } from "./MainEngine.js";
 
 export class Canvas extends MainEngine {
+
+    /**
+     * Initialize the Canvas class to handle rendering of the grid
+     * @param {HTMLElement} gridContainer the main element for the grid
+     * @param {number} default_row_height the default height for each row
+     * @param {number} default_col_width the default width for each column
+     * @param {*} colInstance the column instance
+     * @param {*} rowsInstance the rows instance
+     */
     constructor(gridContainer, default_row_height=25, default_col_width=100, colInstance, rowsInstance) {
         super(gridContainer, colInstance, rowsInstance);
 
@@ -16,6 +25,9 @@ export class Canvas extends MainEngine {
         this.init()
     }
 
+    /**
+     * Initialize the canvas for rendering initially
+     */
     init(){
         this.dpr = window.devicePixelRatio || 1;
 
@@ -31,10 +43,22 @@ export class Canvas extends MainEngine {
         this.renderer();
     }
 
+    /**
+     * Set the data source instance for the grid
+     * @param {*} datastore datastore instance to be used for fetching cell values
+     */
     setDatastore(datastore) {
         this.datastore = datastore;
     }
 
+    /**
+     * Renderer function which will be called to render the grid
+     * @param {number} scrollX The scrollX position of the grid
+     * @param {number} scrollY The scrollY position of the grid
+     * @param {number} rowStart The starting row index
+     * @param {number} colStart The starting column index
+     * @param {Object} selection The selection object
+     */
     renderer(scrollX=0, scrollY=0, rowStart=0, colStart=0,  selection = null){
         const dpr = window.devicePixelRatio || 1;
 
@@ -51,6 +75,15 @@ export class Canvas extends MainEngine {
         this.renderCanvas(this.ctx, scrollX, scrollY, rowStart, colStart, selection);
     }
 
+    /**
+     * Render the grid on the canvas
+     * @param {canvascontext} ctx context of the canvas to render
+     * @param {number} scrollX The scrollX position of the grid
+     * @param {number} scrollY The scrollY position of the grid
+     * @param {number} rowStart The starting row index
+     * @param {number} colStart The starting column index
+     * @param {Object} selection The selection object
+     */
     renderCanvas(ctx, scrollX=0, scrollY=0, rowStart=0, colStart=0, selection = null){
         this.setViewportSize();
         ctx.clearRect(0, 0, this.viewPortWidth, this.viewPortHeight);
@@ -80,7 +113,6 @@ export class Canvas extends MainEngine {
             colIndex++;
         }
 
-        console.log(selection)
         ctx.lineWidth = 1 / window.devicePixelRatio;
         ctx.font = "12px Arial";
         ctx.strokeStyle = "#d0d0d0";
@@ -113,7 +145,7 @@ export class Canvas extends MainEngine {
                 const isSingleCell = (startRow === endRow && startCol === endCol);
                 
                 if (isSingleCell) {
-                    // Find the row and column in the visible arrays
+                    
                     const visibleRow = visibleRows.find(r => r.index === startRow);
                     const visibleCol = visibleCols.find(c => c.index === startCol);
                     
@@ -127,7 +159,7 @@ export class Canvas extends MainEngine {
                         ctx.lineWidth = 2;
                         ctx.strokeRect(colX + 0.5, rowY + 0.5, colWidth, rowHeight);
                         
-                        // Only show resize handle if not in editing mode
+                        
                         if (!selection.isEditing) {
                             ctx.fillStyle = "#147E43";
                             ctx.fillRect(colX + colWidth - 4, rowY + rowHeight - 4, 8, 8);
@@ -137,22 +169,22 @@ export class Canvas extends MainEngine {
                         }
                     }
                 } else {
-                    // For multi-cell selections, we need to calculate the viewport bounds
-                    // Find the bounds of the selection in viewport coordinates
+                    
+                    
                     let selectionStartY = null;
                     let selectionStartX = null;
                     let selectionEndY = null;
                     let selectionEndX = null;
                     
-                    // Find start row position
+                    
                     const startRowVisible = visibleRows.find(r => r.index === startRow);
                     if (startRowVisible) {
                         selectionStartY = startRowVisible.y;
                     } else if (startRow < rowStart) {
-                        // Selection starts before visible area
+                        
                         selectionStartY = visibleRows[0]?.y - this.rows.getCumulativeHeightBetween(startRow, rowStart);
                     } else {
-                        // Selection starts after visible area - calculate from last visible row
+                        
                         const lastVisibleRow = visibleRows[visibleRows.length - 1];
                         if (lastVisibleRow) {
                             selectionStartY = lastVisibleRow.y + lastVisibleRow.height + 
@@ -160,15 +192,15 @@ export class Canvas extends MainEngine {
                         }
                     }
                     
-                    // Find end row position
+                    
                     const endRowVisible = visibleRows.find(r => r.index === endRow);
                     if (endRowVisible) {
                         selectionEndY = endRowVisible.y + endRowVisible.height;
                     } else if (endRow < rowStart) {
-                        // Selection ends before visible area
+                        
                         selectionEndY = visibleRows[0]?.y - this.rows.getCumulativeHeightBetween(endRow + 1, rowStart);
                     } else {
-                        // Selection ends after visible area
+                        
                         const lastVisibleRow = visibleRows[visibleRows.length - 1];
                         if (lastVisibleRow) {
                             selectionEndY = lastVisibleRow.y + lastVisibleRow.height + 
@@ -177,15 +209,15 @@ export class Canvas extends MainEngine {
                         }
                     }
                     
-                    // Find start col position
+                    
                     const startColVisible = visibleCols.find(c => c.index === startCol);
                     if (startColVisible) {
                         selectionStartX = startColVisible.x;
                     } else if (startCol < colStart) {
-                        // Selection starts before visible area
+                        
                         selectionStartX = visibleCols[0]?.x - this.cols.getCumulativeWidthBetween(startCol, colStart);
                     } else {
-                        // Selection starts after visible area
+                        
                         const lastVisibleCol = visibleCols[visibleCols.length - 1];
                         if (lastVisibleCol) {
                             selectionStartX = lastVisibleCol.x + lastVisibleCol.width + 
@@ -193,15 +225,15 @@ export class Canvas extends MainEngine {
                         }
                     }
                     
-                    // Find end col position
+                    
                     const endColVisible = visibleCols.find(c => c.index === endCol);
                     if (endColVisible) {
                         selectionEndX = endColVisible.x + endColVisible.width;
                     } else if (endCol < colStart) {
-                        // Selection ends before visible area
+                        
                         selectionEndX = visibleCols[0]?.x - this.cols.getCumulativeWidthBetween(endCol + 1, colStart);
                     } else {
-                        // Selection ends after visible area
+                        
                         const lastVisibleCol = visibleCols[visibleCols.length - 1];
                         if (lastVisibleCol) {
                             selectionEndX = lastVisibleCol.x + lastVisibleCol.width + 
@@ -210,7 +242,7 @@ export class Canvas extends MainEngine {
                         }
                     }
                     
-                    // Check if selection is visible
+                    
                     const isVisible = selectionStartX !== null && selectionStartY !== null &&
                                     selectionEndX !== null && selectionEndY !== null &&
                                     !(selectionEndX < 0 || selectionStartX > this.viewPortWidth ||
@@ -220,7 +252,7 @@ export class Canvas extends MainEngine {
                         continue;
                     }
                     
-                    // Fill individual cells that are visible
+                    
                     for (let r = startRow; r <= endRow; r++) {
                         for (let c = startCol; c <= endCol; c++) {
                             const visibleRow = visibleRows.find(vr => vr.index === r);
@@ -243,7 +275,7 @@ export class Canvas extends MainEngine {
                         }
                     }
                     
-                    // Draw selection border
+                    
                     const clippedStartY = Math.max(0, selectionStartY);
                     const clippedStartX = Math.max(0, selectionStartX);
                     const clippedEndY = Math.min(this.viewPortHeight, selectionEndY);
@@ -259,7 +291,7 @@ export class Canvas extends MainEngine {
                             clippedEndY - clippedStartY
                         );
                         
-                        // Draw resize handle
+                        
                         if (selectionEndX >= 4 && selectionEndX <= this.viewPortWidth + 4 && 
                             selectionEndY >= 4 && selectionEndY <= this.viewPortHeight + 4) {
                             ctx.fillStyle = "#147E43";
@@ -274,28 +306,24 @@ export class Canvas extends MainEngine {
         }
 
         ctx.fillStyle = "#000";
-        // ctx.textBaseline = "middle";
+        
 
         for (let row of visibleRows) {
             for (let col of visibleCols) {
                 const cellValue = this.getCellValue(row.index, col.index);
                 if (cellValue && cellValue.toString().trim() !== '') {
                     const cellValueStr = cellValue.toString();
-                    const isNumber = !isNaN(cellValue) && !isNaN(parseFloat(cellValue)) && isFinite(cellValue);
+                    const isNumber = !isNaN(cellValue);
                     
-                    // Set text alignment based on whether it's a number
                     let textX;
                     if (isNumber) {
-                        // Right align numbers
                         textX = col.x + col.width - 4;
                         ctx.textAlign = 'right';
                     } else {
-                        // Left align text
                         textX = col.x + 4;
                         ctx.textAlign = 'left';
                     }
                     
-                    // Position text at bottom of cell with some padding
                     const textY = row.y + row.height - 4;
                     
                     ctx.save();
@@ -310,7 +338,11 @@ export class Canvas extends MainEngine {
         }
     }
 
-    // Add this method to get cell values
+    /**
+     * Get the cell value for a specific row and column
+     * @param {number} row the row index
+     * @param {number} col the column index
+     */
     getCellValue(row, col) {
         if (this.datastore) {
             return this.datastore.getCellValue(row, col);

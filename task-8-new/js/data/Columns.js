@@ -1,4 +1,11 @@
 export class Columns {
+    
+    /**
+     * Map to store column widths
+     * @type {Map<number, number>}
+     */
+    #colsData;
+
 
     /**
      * initialize the Columns object
@@ -6,7 +13,7 @@ export class Columns {
      */
     constructor(defaultColumnWidth = 100){
         this.defaultColumnWidth = defaultColumnWidth;
-        this.colsData = new Map();
+        this.#colsData = new Map();
     }
 
     /**
@@ -15,7 +22,7 @@ export class Columns {
      * @returns {number} Width of the column
      */
     getColumnWidth(colIndex){
-        return this.colsData.get(colIndex) || this.defaultColumnWidth;
+        return this.#colsData.get(colIndex) || this.defaultColumnWidth;
     }
 
     /**
@@ -24,7 +31,7 @@ export class Columns {
      * @param {number} width The new width of the column
      */
     setColumnWidth(colIndex, width){
-        this.colsData.set(colIndex, width);
+        this.#colsData.set(colIndex, width);
     }
  
     /**
@@ -58,6 +65,11 @@ export class Columns {
         return colIndex;
     }
 
+    /**
+     * get the cumulative width of columns until a specific index
+     * @param {number} colIndex the column index until which the cumulative width is needed
+     * @returns {number} the cumulative width of columns until the specified index
+     */
     getCumulativeWidthUntil(colIndex) {
         let width = 0;
         for (let i = 0; i < colIndex; i++) {
@@ -66,7 +78,12 @@ export class Columns {
         return width;
     }
 
-    // In your cols class  
+    /**
+     * get cumulative width of columns between two indices
+     * @param {number} startCol the starting column index
+     * @param {number} endCol the ending column index
+     * @returns {number} the cumulative width of columns between the specified indices
+     */
     getCumulativeWidthBetween(startCol, endCol) {
         let width = 0;
         for (let i = startCol; i < endCol; i++) {
@@ -75,7 +92,11 @@ export class Columns {
         return width;
     }
 
-
+    /**
+     * Get the column at a specific absolute X position
+     * @param {number} absoluteX the absolute X position
+     * @returns {number} the index of the column
+     */
     getColumnAtAbsolutePosition(absoluteX) {
         let cumulativeWidth = 0;
         let col = 0;
@@ -91,6 +112,11 @@ export class Columns {
         };
     }
 
+    /**
+     * Get the absolute position of a column
+     * @param {number} colIndex 
+     * @returns {number} the absolute position of the column
+     */
     getAbsoluteColumnPosition(colIndex) {
         let cumulativeWidth = 0;
         

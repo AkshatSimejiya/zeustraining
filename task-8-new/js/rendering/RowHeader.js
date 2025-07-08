@@ -48,7 +48,7 @@ export class RowHeader extends MainEngine {
     renderCanvas(ctx, scrollX=0, scrollY=0, rowStart=0, colStart=0, selection = null){
         this.setViewportSize();
 
-        console.log("Rendering Row Header", scrollX, scrollY, rowStart, colStart, selection);
+        
 
         ctx.clearRect(0, 0, this.row_header_width, this.viewPortHeight);
         
@@ -58,12 +58,13 @@ export class RowHeader extends MainEngine {
         ctx.fillStyle = "#F5F5F5";
         ctx.fillRect(0, 0, this.row_header_width, this.viewPortHeight);
 
+        if (selection && selection.selections && selection.selections.length > 0) {
+            this.renderSelectionHighlights(ctx, scrollY, rowStart, selection);
+        }
+
         let currentY = -scrollY;
         let rowIndex = rowStart;
 
-        
-
-        // Second pass: Draw borders and text
         ctx.beginPath();
         ctx.fillStyle = "#000";
         ctx.moveTo(this.row_header_width-0.5, 0);
@@ -77,15 +78,14 @@ export class RowHeader extends MainEngine {
             if (currentY + rowHeight >= 0) {
                 const label = rowIndex + 1;
                 
-                // Check if this row is selected to adjust text color
+                ctx.strokeStyle = "#d0d0d0";
+                ctx.moveTo(0, currentY + rowHeight + 0.5);
+                ctx.lineTo(this.row_header_width, currentY + rowHeight + 0.5);
+                
                 const isSelected = selection ? this.isRowInSelection(rowIndex, selection) : false;
                 ctx.fillStyle = isSelected ? "#107C41" : "#000";
                 
                 ctx.fillText(label, ((this.row_header_width-5)-ctx.measureText(label).width), currentY + rowHeight / 2 + 4);
-                
-                ctx.strokeStyle = "#d0d0d0";
-                ctx.moveTo(0, currentY + rowHeight + 0.5);
-                ctx.lineTo(this.row_header_width, currentY + rowHeight + 0.5);
             }
             
             currentY += rowHeight;
@@ -94,11 +94,6 @@ export class RowHeader extends MainEngine {
         
         ctx.stroke();
         ctx.closePath();
-
-        // First pass: Draw selection highlights
-        if (selection && selection.selections && selection.selections.length > 0) {
-            this.renderSelectionHighlights(ctx, scrollY, rowStart, selection);
-        }
     }
 
     /**
@@ -130,7 +125,7 @@ export class RowHeader extends MainEngine {
                 
                 if (clippedHeight > 0) {
                     // Draw selection highlight
-                    ctx.fillStyle = this.getSelectionColor(sel);
+                    ctx.fillStyle = "#CAEAD8";
                     ctx.fillRect(0, startY, this.row_header_width, clippedHeight);
                     
                     // Draw selection border only on right side
@@ -176,18 +171,6 @@ export class RowHeader extends MainEngine {
         return selection.selections.some(sel => 
             row >= sel.startRow && row <= sel.endRow
         );
-    }
-
-    /**
-     * Get selection color based on selection type
-     */
-    getSelectionColor(selection) {
-        if (selection.type === 'row') {
-            return "#CAEAD8"; // Blue for row selection
-        } else if (selection.type === 'cell') {
-            return "#CAEAD8"; // Lighter blue for cell selection
-        }
-        return "#CAEAD8"; // Default
     }
 
     /**
