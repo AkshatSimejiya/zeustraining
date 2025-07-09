@@ -157,7 +157,7 @@ export class Canvas extends MainEngine {
                         
                         ctx.strokeStyle = "#147E43";
                         ctx.lineWidth = 2;
-                        ctx.strokeRect(colX + 0.5, rowY + 0.5, colWidth, rowHeight);
+                        ctx.strokeRect(colX, rowY, colWidth, rowHeight);
                         
                         
                         if (!selection.isEditing) {

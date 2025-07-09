@@ -142,6 +142,59 @@ export class ColumnHeader extends MainEngine {
         this.renderCanvas(this.ctx, scrollX, scrollY, rowStart, colStart, selection);
     }
 
+    // renderCanvas(ctx, scrollX=0, scrollY=0, rowStart=0, colStart=0, selection = null){
+    //     this.setViewportSize();
+    //     ctx.clearRect(0, 0, this.viewPortWidth, this.default_row_height);
+        
+    //     ctx.lineWidth = 1  / window.devicePixelRatio;
+    //     ctx.font = "12px Arial"
+    //     ctx.strokeStyle = "#d0d0d0";
+    //     ctx.fillStyle = "#F5F5F5";
+    //     ctx.textBaseline = "middle";
+    //     ctx.fillRect(0, 0, this.viewPortWidth, this.default_row_height);
+
+    //     // FIRST: Draw selection highlights BEFORE text
+    //     if (selection && selection.selections && selection.selections.length > 0) {
+    //         this.renderSelectionHighlights(ctx, scrollX, colStart, selection);
+    //     }
+
+    //     let currentX = -scrollX;
+    //     let colIndex = colStart;
+        
+    //     // SECOND: Draw borders and text (this will render on top of highlights)
+    //     ctx.beginPath();
+    //     ctx.fillStyle = "#000";
+    //     ctx.moveTo(0, this.default_row_height-0.5);
+    //     ctx.lineTo(this.viewPortWidth, this.default_row_height-0.5);
+        
+    //     currentX = -scrollX;
+    //     colIndex = colStart;
+        
+    //     while (currentX < this.viewPortWidth && colIndex < colStart + 1000) {
+    //         const colWidth = this.cols.getColumnWidth(colIndex);
+            
+    //         if (currentX + colWidth >= 0) {
+    //             const label = this.columnLabel(colIndex);
+                
+    //             // Check if this column is selected to adjust text color
+    //             const isSelected = selection ? this.isColumnInSelection(colIndex, selection) : false;
+    //             ctx.fillStyle = isSelected ? "#107C41" : "#000";
+                
+    //             ctx.fillText(label, currentX + colWidth / 2, this.default_row_height / 2);
+                
+    //             ctx.strokeStyle = "#d0d0d0";
+    //             ctx.moveTo(currentX + colWidth + 0.5, 0);
+    //             ctx.lineTo(currentX + colWidth + 0.5, this.default_row_height);
+    //         }
+            
+    //         currentX += colWidth;
+    //         colIndex++;
+    //     }
+        
+    //     ctx.stroke();
+    //     ctx.closePath();
+    // }
+
     renderCanvas(ctx, scrollX=0, scrollY=0, rowStart=0, colStart=0, selection = null){
         this.setViewportSize();
         ctx.clearRect(0, 0, this.viewPortWidth, this.default_row_height);
@@ -153,20 +206,43 @@ export class ColumnHeader extends MainEngine {
         ctx.textBaseline = "middle";
         ctx.fillRect(0, 0, this.viewPortWidth, this.default_row_height);
 
-        // FIRST: Draw selection highlights BEFORE text
+        // FIRST: Draw all lines (bottom layer)
+        let currentX = -scrollX;
+        let colIndex = colStart;
+        
+        ctx.beginPath();
+        ctx.strokeStyle = "#d0d0d0";
+        
+        // Draw bottom horizontal line
+        ctx.moveTo(0, this.default_row_height-0.5);
+        ctx.lineTo(this.viewPortWidth, this.default_row_height-0.5);
+        
+        // Draw vertical lines
+        currentX = -scrollX;
+        colIndex = colStart;
+        
+        while (currentX < this.viewPortWidth && colIndex < colStart + 1000) {
+            const colWidth = this.cols.getColumnWidth(colIndex);
+            
+            if (currentX + colWidth >= 0) {
+                // Draw vertical line at right of column
+                ctx.moveTo(currentX + colWidth + 0.5, 0);
+                ctx.lineTo(currentX + colWidth + 0.5, this.default_row_height);
+            }
+            
+            currentX += colWidth;
+            colIndex++;
+        }
+        
+        ctx.stroke();
+        ctx.closePath();
+
+        // SECOND: Draw selection highlights (middle layer)
         if (selection && selection.selections && selection.selections.length > 0) {
             this.renderSelectionHighlights(ctx, scrollX, colStart, selection);
         }
 
-        let currentX = -scrollX;
-        let colIndex = colStart;
-        
-        // SECOND: Draw borders and text (this will render on top of highlights)
-        ctx.beginPath();
-        ctx.fillStyle = "#000";
-        ctx.moveTo(0, this.default_row_height-0.5);
-        ctx.lineTo(this.viewPortWidth, this.default_row_height-0.5);
-        
+        // THIRD: Draw text (top layer)
         currentX = -scrollX;
         colIndex = colStart;
         
@@ -181,19 +257,13 @@ export class ColumnHeader extends MainEngine {
                 ctx.fillStyle = isSelected ? "#107C41" : "#000";
                 
                 ctx.fillText(label, currentX + colWidth / 2, this.default_row_height / 2);
-                
-                ctx.strokeStyle = "#d0d0d0";
-                ctx.moveTo(currentX + colWidth + 0.5, 0);
-                ctx.lineTo(currentX + colWidth + 0.5, this.default_row_height);
             }
             
             currentX += colWidth;
             colIndex++;
         }
-        
-        ctx.stroke();
-        ctx.closePath();
     }
+
 
     /**
      * Render selection highlights for column headers

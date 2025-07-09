@@ -50,13 +50,13 @@ export class ViewPort {
         this.editingCell = { row: -1, col: -1 };
         
         this.autoScrollTimer = null;
-        this.autoScrollSpeed = 5;
-        this.autoScrollThreshold = 20;
+        this.autoScrollSpeed = 15;
+        this.autoScrollThreshold = 30;
 
         this.selection.setCallback('onSelectionChange', (selections) => {
             this.onSelectionChange(selections);
         });
-
+        
     }
 
     /**
@@ -689,7 +689,7 @@ export class ViewPort {
             this.removeInputBox();
         }
 
-        const delta = e.deltaY;
+        const delta = e.deltaY * 1.1;
 
         if (e.shiftKey) {
             this.absoluteScrollX += delta;
