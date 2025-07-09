@@ -48,8 +48,6 @@ export class RowHeader extends MainEngine {
     renderCanvas(ctx, scrollX=0, scrollY=0, rowStart=0, colStart=0, selection = null){
         this.setViewportSize();
 
-        
-
         ctx.clearRect(0, 0, this.row_header_width, this.viewPortHeight);
         
         ctx.lineWidth = 1 / window.devicePixelRatio;

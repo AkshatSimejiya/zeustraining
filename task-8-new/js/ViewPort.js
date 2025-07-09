@@ -72,6 +72,9 @@ export class ViewPort {
         
     }
 
+    /**
+     * Update Headers only while the user is resizing the rows or columns
+     */
     updateHeadersOnly(){
         const selectionData = this.getSelectionForRendering();
 
@@ -762,7 +765,6 @@ export class ViewPort {
                 }
             }
             
-            // Calculate column for column header clicks
             if (containerY < col_header_height && containerX >= row_header_width) {
                 const absoluteGridX = gridX + this.absoluteScrollX;
                 if (this.cols && typeof this.cols.getColumnAtAbsolutePosition === 'function') {
@@ -840,28 +842,37 @@ export class ViewPort {
             }
         } else if (position.row >= 0 && position.col >= 0) {
             if (e.shiftKey && this.selection.getActiveSelection()) {
+                // Range selection (existing logic is mostly correct)
                 if(this.selection.isRangeSelection()) {
-                    return
+                    return;
                 }
                 const active = this.selection.getActiveSelection();
                 this.selection.selectRange(
                     active.activeRow || active.startRow, 
                     active.activeCol || active.startCol,
                     position.row, position.col,
-                    true,
+                    true, // preserveExisting = true
                     active.activeRow || active.startRow,
                     active.activeCol || active.startCol
                 );
-            } else {
-                if (e.ctrlKey) {
-                    this.selection.addSelection(position.row, position.col, 'cell');
+            } else if (e.ctrlKey) {
+                // Multi-selection logic - THIS NEEDS TO BE FIXED
+                if (this.selection.isSelectionAt(position.row, position.col)) {
+                    // If cell is already selected, remove it
+                    this.selection.removeSelectionAt(position.row, position.col);
                 } else {
-                    this.selection.clearAllSelections();
-                    this.selection.startSelection(
-                        position.row, position.col, 'cell',
-                        false, false
-                    );
+                    // Add to selection
+                    this.selection.selectCell(position.row, position.col, true); // preserveExisting = true
                 }
+                // Don't set up dragging for Ctrl+click
+                this.isDragging = false;
+            } else {
+                // Single selection (existing logic is correct)
+                this.selection.clearAllSelections();
+                this.selection.startSelection(
+                    position.row, position.col, 'cell',
+                    false, false
+                );
                 
                 this.isDragging = true;
                 this.dragStartRow = position.row;

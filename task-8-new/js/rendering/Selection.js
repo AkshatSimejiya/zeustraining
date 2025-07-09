@@ -6,14 +6,21 @@ export class Selection {
     }
 
     /**
-     * Select a range of cells with active cell tracking
+     * Function to select the range of cels
+     * @param {number} startRow The starting row of range 
+     * @param {number} startCol The starting column of the range
+     * @param {number} endRow The ending row of the range
+     * @param {number} endCol The ending column of the range
+     * @param {boolean} preserveExisting 
+     * @param {number} activeRow The row of active cell
+     * @param {number} activeCol The col of active cell
+     * @returns {object} The selected range
      */
     selectRange(startRow, startCol, endRow, endCol, preserveExisting = false, activeRow = null, activeCol = null) {
         if (!preserveExisting) {
             this.clearAllSelections();
         }
 
-        // Ensure start is top-left and end is bottom-right
         const minRow = Math.min(startRow, endRow);
         const maxRow = Math.max(startRow, endRow);
         const minCol = Math.min(startCol, endCol);
@@ -24,7 +31,7 @@ export class Selection {
             endRow: maxRow,
             startCol: minCol,
             endCol: maxCol,
-            activeRow: activeRow || startRow, // The cell where selection actually started
+            activeRow: activeRow || startRow,
             activeCol: activeCol || startCol,
             type: 'cell'
         };
@@ -35,9 +42,12 @@ export class Selection {
     }
 
     /**
-     * Select an entire row
+     * Select a particular row
+     * @param {number} row The row index 
+     * @param {*} preserveExisting 
+     * @returns {object} selection object which contains the data about the selection
      */
-    selectRow(row, preserveExisting = false, extend = false) {
+    selectRow(row, preserveExisting = false) {
         if (!preserveExisting) {
             this.clearAllSelections();
         }
@@ -46,7 +56,7 @@ export class Selection {
             startRow: row,
             endRow: row,
             startCol: 0,
-            endCol: Number.MAX_SAFE_INTEGER, // Select entire row
+            endCol: Number.MAX_SAFE_INTEGER,
             activeRow: row,
             activeCol: 0,
             type: 'row'
@@ -58,16 +68,19 @@ export class Selection {
     }
 
     /**
-     * Select an entire column
+     * Select a column
+     * @param {*} col The col index
+     * @param {*} preserveExisting If we want to keep the existing selection or not
+     * @returns {object} Selection object which contains the data about the selections
      */
-    selectColumn(col, preserveExisting = false, extend = false) {
+    selectColumn(col, preserveExisting = false) {
         if (!preserveExisting) {
             this.clearAllSelections();
         }
 
         const selection = {
             startRow: 0,
-            endRow: Number.MAX_SAFE_INTEGER, // Select entire column
+            endRow: Number.MAX_SAFE_INTEGER,
             startCol: col,
             endCol: col,
             activeRow: 0,
@@ -81,8 +94,8 @@ export class Selection {
     }
 
     /**
-     * Get selection bounds for rendering
-     * @returns {Object} - {minRow, maxRow, minCol, maxCol}
+     * Get the selection bounds 
+     * @returns minRow, maxRow, minCol, maxCol 
      */
     getSelectionBounds() {
         if (this.selections.length === 0) return null;
@@ -101,7 +114,10 @@ export class Selection {
     }
 
     /**
-     * Select a single cell
+     * Select cell
+     * @param {number} row The row index of the cell that needs to be selected 
+     * @param {number} col The column index of the cell that needs to be selected
+     * @returns the selection object that is created
      */
     selectCell(row, col) {
         this.clearAllSelections();
@@ -110,7 +126,7 @@ export class Selection {
             endRow: row,
             startCol: col,
             endCol: col,
-            activeRow: row, // For single cell, active is the same as start
+            activeRow: row,
             activeCol: col,
             type: 'cell'
         };
@@ -121,8 +137,8 @@ export class Selection {
     }
 
     /**
-     * Check if the active selection is a range (more than one cell)
-     * @returns {boolean}
+     * Function to check if the selection is range or not
+     * @returns {boolean} True if the range is selected
      */
     isRangeSelection() {
         const active = this.getActiveSelection();
@@ -131,13 +147,18 @@ export class Selection {
         const isSingleRow = active.startRow === active.endRow;
         const isSingleCol = active.startCol === active.endCol;
 
-        return !(isSingleRow && isSingleCol); // true if it's a range
+        return !(isSingleRow && isSingleCol);
     }
 
     /**
-     * Start a new selection (for mouse down)
+     * Start the selection for cell range
+     * @param {number} row The row index from where the selection needs to start
+     * @param {number} col The col index for the selection start
+     * @param {*} type Cell selection
+     * @param {boolean} preserveExisting If we need to preserve the existing selection or not
+     * @returns {object} The selection object 
      */
-    startSelection(row, col, type = 'cell', preserveExisting = false, isMultiSelect = false) {
+    startSelection(row, col, type = 'cell', preserveExisting = false) {
         if (!preserveExisting) {
             this.clearAllSelections();
         }
@@ -147,7 +168,7 @@ export class Selection {
             endRow: row,
             startCol: col,
             endCol: col,
-            activeRow: row, // Track where the selection started
+            activeRow: row,
             activeCol: col,
             type: type
         };
@@ -159,35 +180,18 @@ export class Selection {
     }
 
     /**
-     * Update current selection (for mouse drag)
-     */
-    updateSelection(row, col) {
-        if (this.selections.length === 0) return;
-
-        const currentSelection = this.selections[this.selections.length - 1];
-        
-        // Keep the original active cell, but update the range
-        const activeRow = currentSelection.activeRow;
-        const activeCol = currentSelection.activeCol;
-        
-        // Update the range based on active cell and current position
-        currentSelection.startRow = Math.min(activeRow, row);
-        currentSelection.endRow = Math.max(activeRow, row);
-        currentSelection.startCol = Math.min(activeCol, col);
-        currentSelection.endCol = Math.max(activeCol, col);
-
-        this.triggerCallback('onSelectionChange', this.selections);
-    }
-
-    /**
-     * End selection (for mouse up)
+     * End the selection by setting the isSelecting flag to false
      */
     endSelection() {
         this.isSelecting = false;
     }
 
     /**
-     * Add a new selection to existing ones
+     * Add new cells to the selection
+     * @param {number} row The row index of the cell
+     * @param {number} col The col index of the cell
+     * @param {*} type The type of selecrion
+     * @returns {object} Selection object
      */
     addSelection(row, col, type = 'cell') {
         const selection = {
@@ -206,21 +210,23 @@ export class Selection {
     }
 
     /**
-     * Get the active selection (usually the last one)
+     * Get the active selection
+     * @returns {object} Returns the last active selection
      */
     getActiveSelection() {
         return this.selections.length > 0 ? this.selections[this.selections.length - 1] : null;
     }
 
     /**
-     * Get all selections
+     * Fetch all the selection
+     * @returns {object} Get all the active selections
      */
     getAllSelections() {
         return this.selections;
     }
 
     /**
-     * Clear all selections
+     * Clear all the selections
      */
     clearAllSelections() {
         this.selections = [];
@@ -229,7 +235,10 @@ export class Selection {
     }
 
     /**
-     * Check if a cell is selected
+     * Check if the cell is selected or not
+     * @param {number} row The row index of the cell that needs to be checked
+     * @param {number} col The col index of the cell that needs to be checked
+     * @returns {boolean} Boolean value of the result
      */
     isCellSelected(row, col) {
         return this.selections.some(sel => 
@@ -239,7 +248,9 @@ export class Selection {
     }
 
     /**
-     * Check if a row is selected
+     * Check if the row is selected or not
+     * @param {number} row Row index 
+     * @returns {boolean}
      */
     isRowSelected(row) {
         return this.selections.some(sel => 
@@ -248,7 +259,9 @@ export class Selection {
     }
 
     /**
-     * Check if a column is selected
+     * Check if the column is selected or not
+     * @param {number} col Col Index
+     * @returns {boolean} 
      */
     isColumnSelected(col) {
         return this.selections.some(sel => 
@@ -257,18 +270,23 @@ export class Selection {
     }
 
     /**
-     * Set callback for selection changes
+     * Setting the callback event 
+     * @param {*} eventName Event name
+     * @param {*} callback 
      */
     setCallback(eventName, callback) {
         this.callbacks[eventName] = callback;
     }
 
     /**
-     * Trigger callback
+     * Trigger the callback events
+     * @param {*} eventName Event name
+     * @param {*} data 
      */
     triggerCallback(eventName, data) {
         if (this.callbacks[eventName]) {
             this.callbacks[eventName](data);
         }
     }
+    
 }
