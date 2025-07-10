@@ -1,9 +1,17 @@
 import { MainEngine } from "./MainEngine.js";
-//Row Header responsible for rendering the rows canvas
 
 export class RowHeader extends MainEngine {
-    constructor(gridContainer, default_row_height=25, default_col_width=100, colInstance, rowsInstance) {
-        super(gridContainer, colInstance, rowsInstance);
+
+    /**
+     * Initializes the RowHeader instance which will be responsible for rendering the row headers in the grid.
+     * @param {*} gridContainer the grid container holding the row headers
+     * @param {*} default_row_height default height of rows
+     * @param {*} default_col_width default width of columns
+     * @param {*} colInstance the column instance for managing column-related data
+     * @param {*} rowsInstance the rows instance for managing row-related data
+     */
+    constructor(gridContainer, default_row_height=25, default_col_width=100, rowsInstance) {
+        super(gridContainer, null, rowsInstance);
 
         this.viewPortWidth = 0;
         this.viewPortHeight = 0;
@@ -15,6 +23,9 @@ export class RowHeader extends MainEngine {
         this.init()
     }
 
+    /**
+     * Initializes the canvas and sets up the rendering context.
+     */
     init(){
         this.dpr = window.devicePixelRatio || 1;
 
@@ -30,6 +41,14 @@ export class RowHeader extends MainEngine {
         this.renderer();
     }
 
+    /**
+     * Renders the row headers on the canvas.
+     * @param {number} scrollX the scrollX position
+     * @param {number} scrollY the scrollY position
+     * @param {number} rowStart The Starting row index for rendering
+     * @param {number} colStart The Starting column index for rendering
+     * @param {Object} selection The selection object
+     */
     renderer(scrollX=0, scrollY=0, rowStart=0, colStart=0, selection = null){
         const dpr = window.devicePixelRatio || 1;
 
@@ -45,57 +64,15 @@ export class RowHeader extends MainEngine {
         this.renderCanvas(this.ctx, scrollX, scrollY, rowStart, colStart, selection);
     }
 
-    // renderCanvas(ctx, scrollX=0, scrollY=0, rowStart=0, colStart=0, selection = null){
-    //     this.setViewportSize();
-
-    //     ctx.clearRect(0, 0, this.row_header_width, this.viewPortHeight);
-        
-    //     ctx.lineWidth = 1 / window.devicePixelRatio;
-    //     ctx.font = "12px Arial"
-    //     ctx.strokeStyle = "#d0d0d0";
-    //     ctx.fillStyle = "#F5F5F5";
-    //     ctx.fillRect(0, 0, this.row_header_width , this.viewPortHeight);
-
-    //     let currentY = -scrollY;
-    //     let rowIndex = rowStart;
-
-    //     ctx.beginPath();
-    //     ctx.fillStyle = "#000";
-    //     ctx.moveTo(this.row_header_width-0.5, 0);
-    //     ctx.lineTo(this.row_header_width-0.5, this.viewPortHeight);
-        
-    //     currentY = -scrollY;
-    //     rowIndex = rowStart;
-        
-    //     while (currentY < this.viewPortHeight && rowIndex < rowStart + 1000) {
-    //         const rowHeight = this.rows.getRowHeight(rowIndex);
-    //         if (currentY + rowHeight >= 0) {
-    //             const label = rowIndex + 1;
-                
-    //             ctx.strokeStyle = "#d0d0d0";
-    //             ctx.moveTo(0, currentY + rowHeight + 0.5);
-    //             ctx.lineTo(this.row_header_width, currentY + rowHeight + 0.5);
-        
-                
-                
-    //             const isSelected = selection ? this.isRowInSelection(rowIndex, selection) : false;
-                
-                
-    //             if (selection && selection.selections && selection.selections.length > 0) {
-    //                 this.renderSelectionHighlights(ctx, scrollY, rowStart, selection);
-    //             }
-    //             ctx.fillStyle = isSelected ? "#107C41" : "#000";
-    //             ctx.fillText(label, ((this.row_header_width-5)-ctx.measureText(label).width), currentY + rowHeight / 2 + 4);
-    //         }
-            
-    //         currentY += rowHeight;
-    //         rowIndex++;
-    //     }
-        
-    //     ctx.stroke();
-    //     ctx.closePath();
-    // }
-
+    /**
+     * Renders the row headers on the canvas.
+     * @param {*} ctx the canvas context
+     * @param {*} scrollX the scrollX position
+     * @param {*} scrollY the scrollY position
+     * @param {*} rowStart The Starting row index for rendering
+     * @param {*} colStart The Starting column index for rendering
+     * @param {*} selection The selection object
+     */
     renderCanvas(ctx, scrollX=0, scrollY=0, rowStart=0, colStart=0, selection = null){
         this.setViewportSize();
 
@@ -160,7 +137,12 @@ export class RowHeader extends MainEngine {
     }
 
     /**
-     * Render selection highlights for row headers
+     * Renders selection highlights in the row header.
+     * @param {*} ctx the canvas context
+     * @param {number} scrollY the scrollY position
+     * @param {number} rowStart The Starting row index for rendering
+     * @param {Object} selection The selection object
+     * @returns 
      */
     renderSelectionHighlights(ctx, scrollY, rowStart, selection) {
         if (!selection.selections || selection.selections.length === 0) return;
@@ -198,18 +180,20 @@ export class RowHeader extends MainEngine {
     }
 
     /**
-     * Get Y position for a specific row
+     * get the Y position of a specific row in the grid.
+     * @param {number} targetRow The row index to find the Y position for
+     * @param {number} rowStart The starting row index for the current viewport
+     * @param {number} scrollY The scrollY position
+     * @returns {number} - The Y position of the target row relative to the viewport
      */
     getRowYPosition(targetRow, rowStart, scrollY) {
         if (targetRow < rowStart) {
-            // Row is above the viewport, calculate negative position
             let height = 0;
             for (let row = targetRow; row < rowStart; row++) {
                 height += this.rows.getRowHeight(row);
             }
             return -height - scrollY;
         } else {
-            // Row is in or below viewport, calculate positive position
             let height = -scrollY;
             for (let row = rowStart; row < targetRow; row++) {
                 height += this.rows.getRowHeight(row);
@@ -220,6 +204,9 @@ export class RowHeader extends MainEngine {
 
     /**
      * Check if a row is part of any selection
+     * @param {number} row The row index to check
+     * @param {Object} selection The selection object
+     * @returns {boolean} True if the row is in the selection, false otherwise
      */
     isRowInSelection(row, selection) {
         if (!selection.selections) return false;

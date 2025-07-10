@@ -2,8 +2,15 @@
 import { MainEngine } from "./MainEngine.js";
 
 export class CornerCanvas extends MainEngine {
-    constructor(gridContainer, default_row_height=25, default_col_width=100, colInstance, rowsInstance) {
-        super(gridContainer, colInstance, rowsInstance);
+
+    /**
+     * Initializes the CornerCanvas instance
+     * @param {*} gridContainer The main container of the grid
+     * @param {*} default_row_height Default height of row
+     * @param {*} default_col_width Default width of column
+     */
+    constructor(gridContainer, default_row_height=25, default_col_width=100) {
+        super(gridContainer);
 
         this.viewPortWidth = 0;
         this.viewPortHeight = 0;
@@ -15,6 +22,9 @@ export class CornerCanvas extends MainEngine {
         this.init()
     }
 
+    /**
+     * Initializes the canvas and its context
+     */
     init(){
         this.dpr = window.devicePixelRatio || 1;
 
@@ -30,7 +40,14 @@ export class CornerCanvas extends MainEngine {
         this.renderer();
     }
 
-    renderer(scrollX=0, scrollY=0, rowStart=0, colStart=0){
+    /**
+     * Renders the corner canvas
+     * @param {*} scrollX 
+     * @param {*} scrollY 
+     * @param {*} rowStart 
+     * @param {*} colStart 
+     */
+    renderer(){
         const dpr = window.devicePixelRatio || 1;
 
 
@@ -43,10 +60,14 @@ export class CornerCanvas extends MainEngine {
         this.canvas.style.left = "0px";
         this.ctx.scale(dpr, dpr);
 
-        this.renderCanvas(this.ctx, scrollX, scrollY, rowStart, colStart);
+        this.renderCanvas(this.ctx);
     }
 
-    renderCanvas(ctx, scrollX=0, scrollY=0, rowStart=0){
+    /**
+     * Render the corner canvas with lines, triangle, and background
+     * @param {*} ctx The canvas rendering context
+     */
+    renderCanvas(ctx){
 
         this.setViewportSize();
 
@@ -64,14 +85,13 @@ export class CornerCanvas extends MainEngine {
         ctx.lineTo(this.row_header_width-0.5, this.default_row_height-0.5);
         ctx.stroke();
 
-        // ▼ Draw the triangle
         const size = 10;
         const gap = 3.5;
-        ctx.fillStyle = "#b0b0b0"; // triangle fill color
+        ctx.fillStyle = "#b0b0b0";
         ctx.beginPath();
-        ctx.moveTo(this.row_header_width - gap, this.default_row_height - gap);                    // Bottom right
-        ctx.lineTo(this.row_header_width - size - gap, this.default_row_height - gap);            // Bottom left of triangle
-        ctx.lineTo(this.row_header_width - gap, this.default_row_height - size - gap);            // Top right of triangle
+        ctx.moveTo(this.row_header_width - gap, this.default_row_height - gap);
+        ctx.lineTo(this.row_header_width - size - gap, this.default_row_height - gap);
+        ctx.lineTo(this.row_header_width - gap, this.default_row_height - size - gap);
         ctx.closePath();
         ctx.fill()
 

@@ -13,44 +13,76 @@ export class ViewPort {
      * @param {*} rowsInstance  rows instance
      */
     constructor(gridContainer, colInstance, rowsInstance){
+
+        /**@type {HTMLElement} The Grid Container*/
         this.gridContainer = gridContainer;
+
+        /**@type {Object} The instance of row*/
         this.rows = rowsInstance;
+
+        /**@type {Object} The instance of cols*/
         this.cols = colInstance;
         
-        /**
-         * @type {Selection} The selection instance
-         */
+        /**@type {Selection} The selection instance*/
         this.selection = new Selection();
 
+        /**@type {Canvas} The main canvas instance*/
         this.canvas = new Canvas(this.gridContainer, 25, 100,  this.cols, this.rows);
-        this.rowCanvas = new RowHeader(this.gridContainer, 25, 100, this.cols, this.rows);
-        this.colCanvas = new ColumnHeader(this.gridContainer,  25, 100, this.cols, this.rows);
-        this.cornerCanvas = new CornerCanvas(this.gridContainer,  25, 100, this.cols, this.rows);
+        
+        /**@type {RowHeader} The row header canvas instance*/
+        this.rowCanvas = new RowHeader(this.gridContainer, 25, 100, this.rows);
 
+        /**@type {ColumnHeader} The column header canavs*/
+        this.colCanvas = new ColumnHeader(this.gridContainer,  25, 100, this.cols);
+        this.cornerCanvas = new CornerCanvas(this.gridContainer,  25, 100);
+
+        /**@type {number} Absolute Scroll Y position*/
         this.absoluteScrollY = 0;
+        
+        /**@type {number} Absolute Scroll X position*/
         this.absoluteScrollX = 0;
         
+
+        /**@type {object} The scroll object to handle the scroll Y and scroll X position*/
         this.scroll = {
             scrollY: 0,
             scrollX: 0
         }
+
+        /**@type {number} Row start for the scroll*/
         this.rowStart = 0;
+
+        /**@type {number} Column Start for the scroll*/
         this.colStart = 0;
 
-        this.default_row_height = 25;
+        /**@type {number} The default column width*/
         this.default_col_width = 100;
 
-        
+        /**@type {boolean} Check if its Dragging*/
         this.isDragging = false;
+
+        /**@type {number} The starting of the drag row*/
         this.dragStartRow = -1;
+
+        /**@type {number} The starting of the drag column*/
         this.dragStartCol = -1;
         
+        /**@type {boolean} The boolean of the input box to check wether the box is added or not*/
         this.inputBox = null;
+
+        /**@type {boolean} Check if its editing right now or not*/
         this.isEditing = false;
+
+        /**@type {object} Row and col of the current editing cell*/
         this.editingCell = { row: -1, col: -1 };
         
+        /**@type {number} Timer to set the auto scroll*/
         this.autoScrollTimer = null;
+
+        /**@type {number} The speed for auto scroll*/
         this.autoScrollSpeed = 15;
+
+        /**@type {number} The threshold where the auto scroll should start*/
         this.autoScrollThreshold = 30;
 
         this.selection.setCallback('onSelectionChange', (selections) => {
@@ -702,7 +734,7 @@ export class ViewPort {
             this.scroll.scrollX = colPosition.scrollX;
 
         } else {
-            this.absoluteScrollY += delta * 0.3;
+            this.absoluteScrollY += delta;
             
             if (this.absoluteScrollY < 0) {
                 this.absoluteScrollY = 0;

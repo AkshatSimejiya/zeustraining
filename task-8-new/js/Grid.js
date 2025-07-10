@@ -3,6 +3,12 @@ import { Columns } from "./data/Columns.js";
 import { Rows } from "./data/Rows.js";
 import {DataStore} from "./data/DataStore.js"
 import { Selection } from "./rendering/Selection.js";
+import { EventManager } from "./EventManager.js";
+import { CellSelection } from "./handlers/CellSelection.js";
+import { ColumnResizer } from "./handlers/ColumnResizer.js";
+import { RowResizer } from "./handlers/RowResizer.js";
+import  { ColumnSelection } from "./handlers/ColumnSelection.js";
+import { RowSelection } from "./handlers/RowSelection.js";
 
 export class Grid {
 
@@ -21,6 +27,15 @@ export class Grid {
 
         this.viewport = new ViewPort(this.gridContainer, this.cols, this.rows, this.selectionSet)
         this.viewport.setDatastore(this.DataStore);
+
+        this.eventmanager = new EventManager();
+
+        this.eventmanager.RegisterHandler(new CellSelection(this.gridContainer, this.viewport));
+        this.eventmanager.RegisterHandler(new RowSelection());
+        this.eventmanager.RegisterHandler(new ColumnSelection());
+        this.eventmanager.RegisterHandler(new ColumnResizer());
+        this.eventmanager.RegisterHandler(new RowResizer());
+
 
         this.isResizing = false;
         this.resizeType = null;
@@ -47,12 +62,20 @@ export class Grid {
             this.updateViewPort(e)
         })
 
-        window.addEventListener('mousedown', (e) => {
-            if (this.checkForResize(e)) {
-                this.startResize(e);
-            } else {
-                this.viewport.handleMouseDown(e);
-            }
+        // window.addEventListener('mousedown', (e) => {
+        //     if (this.checkForResize(e)) {
+        //         this.startResize(e);
+        //     } else {
+        //         this.viewport.handleMouseDown(e);
+        //     }
+        // });
+
+        window.addEventListener('pointerdown', (e) => {
+            this.eventmanager.pointerDown(e)
+        });
+
+        window.addEventListener('pointerup', (e) => {
+            this.eventmanager.pointerUp(e)
         });
 
         window.addEventListener('mousemove', (e) => {
@@ -60,6 +83,7 @@ export class Grid {
                 this.handleResize(e);
             } else {
                 this.viewport.handleMouseMove(e);
+            this.updateResizeCursor(e);
             }
         });
 
@@ -110,9 +134,9 @@ export class Grid {
         
         if (resizeInfo.canResize) {
             if (resizeInfo.type === 'row') {
-                this.gridContainer.style.cursor = 'row-resize';
+                this.gridContainer.style.cursor = 'ns-resize';
             } else if (resizeInfo.type === 'col') {
-                this.gridContainer.style.cursor = 'col-resize';
+                this.gridContainer.style.cursor = 'ew-resize';
             }
         } else {
             this.gridContainer.style.cursor = 'default';

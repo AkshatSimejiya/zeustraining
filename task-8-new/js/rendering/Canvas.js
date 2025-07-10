@@ -136,16 +136,25 @@ export class Canvas extends MainEngine {
         
         if (selection) {
             for (let sel of selection.selections) {
-                const startRow = sel.startRow;
-                const endRow = sel.endRow;
-                const startCol = sel.startCol;
-                const endCol = sel.endCol;
+                const type = sel.type || "cell";
+                let startRow = sel.startRow;
+                let endRow = sel.endRow;
+                let startCol = sel.startCol;
+                let endCol = sel.endCol;
+
+                if (type === "row") {
+                    startCol = 0;
+                    endCol = visibleCols[visibleCols.length - 1]?.index ?? startCol;
+                } else if (type === "column") {
+                    startRow = 0;
+                    endRow = visibleRows[visibleRows.length - 1]?.index ?? startRow;
+                }
+
                 const activeRow = sel.activeRow || startRow;
                 const activeCol = sel.activeCol || startCol;
                 const isSingleCell = (startRow === endRow && startCol === endCol);
                 
                 if (isSingleCell) {
-                    
                     const visibleRow = visibleRows.find(r => r.index === startRow);
                     const visibleCol = visibleCols.find(c => c.index === startCol);
                     
@@ -169,7 +178,6 @@ export class Canvas extends MainEngine {
                         }
                     }
                 } else {
-                    
                     
                     let selectionStartY = null;
                     let selectionStartX = null;
@@ -230,10 +238,8 @@ export class Canvas extends MainEngine {
                     if (endColVisible) {
                         selectionEndX = endColVisible.x + endColVisible.width;
                     } else if (endCol < colStart) {
-                        
                         selectionEndX = visibleCols[0]?.x - this.cols.getCumulativeWidthBetween(endCol + 1, colStart);
                     } else {
-                        
                         const lastVisibleCol = visibleCols[visibleCols.length - 1];
                         if (lastVisibleCol) {
                             selectionEndX = lastVisibleCol.x + lastVisibleCol.width + 
@@ -274,7 +280,6 @@ export class Canvas extends MainEngine {
                             }
                         }
                     }
-                    
                     
                     const clippedStartY = Math.max(0, selectionStartY);
                     const clippedStartX = Math.max(0, selectionStartX);
