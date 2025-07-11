@@ -1,26 +1,38 @@
 export class RowSelection {
-    constructor() {
+    constructor(viewport) {
+        this.viewport = viewport;
         this.rowHeaderWidth = 30;
         this.colHeaderHeight = 25;
     }
 
     hitTest(e) {
-        if(e.clientX > this.rowHeaderWidth && e.clientY > this.colHeaderHeight){
-            return true;
-        }else {
-            return false;
+        const x = e.clientX;
+        const y = e.clientY;
+
+        if (x < this.rowHeaderWidth) {
+            const resizeInfo = this.viewport.getResizeInfo(x, y);
+            return !(resizeInfo.canResize && resizeInfo.type === 'row');
         }
+
+        return false;
     }
 
     pointerDown(e) {
-        console.log("This is the pointer down")
+        console.log("Pointer down on row selection");
+        const position = this.viewport.getGridPositionFromClick(e.clientX, e.clientY);
+        this.viewport.selection.selectRow(position.row, e.ctrlKey, e.shiftKey);
     }
 
-    pointerUp(e){
-        console.log("This should be pointer up")
+    pointerUp(e) {
+        console.log("Pointer up on row selection");
     }
 
-    pointerMove(e){
-        console.log("This should be pointer move")
+    pointerMove(e) {
+        console.log("Pointer move on row selection");
+    }
+
+    setCursor(e) {
+        this.viewport.gridContainer.style.cursor = 'pointer';
+        console.log("Setting cursor to pointer for row selection");
     }
 }

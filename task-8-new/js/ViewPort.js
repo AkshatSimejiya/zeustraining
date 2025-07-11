@@ -116,6 +116,16 @@ export class ViewPort {
         
     }
 
+    updateColumnHeader(){
+        const selectionData = this.getSelectionForRendering();
+        this.colCanvas.renderer(this.scroll.scrollX, this.scroll.scrollY, this.rowStart, this.colStart, selectionData);
+    }
+
+    updateRowHeader(){
+        const selectionData = this.getSelectionForRendering();
+        this.rowCanvas.renderer(this.scroll.scrollX, this.scroll.scrollY, this.rowStart, this.colStart, selectionData);
+    }
+
     /**
      * Calculate which column starts at a given absolute X position
      * @param {*} absoluteX the absolute X position
@@ -856,92 +866,6 @@ export class ViewPort {
     }
 
     /**
-     * Handle mouse down event for selection and range
-     * @param {*} e event object passed from mousedown event
-     */
-    handleMouseDown(e) {
-        if (this.isEditing) {
-            this.commitCellEdit();
-        }
-        
-        const position = this.getGridPositionFromClick(e.clientX, e.clientY);
-        
-        if (position.isHeader) {
-            if (position.isRowHeader && position.row >= 0) {
-                this.selection.selectRow(position.row, e.ctrlKey, e.shiftKey);
-            } else if (position.isColHeader && position.col >= 0) {
-                this.selection.selectColumn(position.col, e.ctrlKey, e.shiftKey);
-            }
-        } else if (position.row >= 0 && position.col >= 0) {
-            if (e.shiftKey && this.selection.getActiveSelection()) {
-                // Range selection (existing logic is mostly correct)
-                if(this.selection.isRangeSelection()) {
-                    return;
-                }
-                const active = this.selection.getActiveSelection();
-                this.selection.selectRange(
-                    active.activeRow || active.startRow, 
-                    active.activeCol || active.startCol,
-                    position.row, position.col,
-                    true, // preserveExisting = true
-                    active.activeRow || active.startRow,
-                    active.activeCol || active.startCol
-                );
-            } else if (e.ctrlKey) {
-                // Multi-selection logic - THIS NEEDS TO BE FIXED
-                if (this.selection.isSelectionAt(position.row, position.col)) {
-                    // If cell is already selected, remove it
-                    this.selection.removeSelectionAt(position.row, position.col);
-                } else {
-                    // Add to selection
-                    this.selection.selectCell(position.row, position.col, true); // preserveExisting = true
-                }
-                // Don't set up dragging for Ctrl+click
-                this.isDragging = false;
-            } else {
-                // Single selection (existing logic is correct)
-                this.selection.clearAllSelections();
-                this.selection.startSelection(
-                    position.row, position.col, 'cell',
-                    false, false
-                );
-                
-                this.isDragging = true;
-                this.dragStartRow = position.row;
-                this.dragStartCol = position.col;
-            }
-        }
-    }
-
-    /**
-     * Handle mouse move for range selection
-     * @param {event} e event object passed from mouse move
-     */
-    handleMouseMove(e) {
-        if (this.isDragging && this.dragStartRow >= 0 && this.dragStartCol >= 0) {
-            const rect = this.gridContainer.getBoundingClientRect();
-            const containerX = e.clientX - rect.left;
-            const containerY = e.clientY - rect.top;
-            
-            this.handleAutoScroll(containerX, containerY);
-            
-            const position = this.getGridPositionFromClick(e.clientX, e.clientY);
-            
-            if (!position.isHeader && position.row >= 0 && position.col >= 0) {
-                this.selection.clearAllSelections();
-                this.selection.selectRange(
-                    this.dragStartRow, this.dragStartCol,
-                    position.row, position.col,
-                    false,
-                    this.dragStartRow,
-                    this.dragStartCol
-                );
-            }
-        }
-    }
-
-
-    /**
      * Auto scroll on selection
      * @param {number} containerX X coordinate for the grid container or the main grid
      * @param {number} containerY Y coordinate of the grid container
@@ -1114,24 +1038,6 @@ export class ViewPort {
         if (this.autoScrollTimer) {
             cancelAnimationFrame(this.autoScrollTimer);
             this.autoScrollTimer = null;
-        }
-    }
-
-    /**
-     * Handle Mouse Up to update the range selection 
-     * @param {event} e event passed while mouse up
-     */
-    handleMouseUp(e) {
-        if (this.isDragging) {
-            this.isDragging = false;
-            this.dragStartRow = -1;
-            this.dragStartCol = -1;
-            
-            this.stopAutoScroll();
-        }
-        
-        if (this.selection.isSelecting) {
-            this.selection.endSelection();
         }
     }
 
