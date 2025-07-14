@@ -6,9 +6,11 @@ export class ColumnResizer {
     }
 
     hitTest(e) {
-        const x = e.clientX;
-        const y = e.clientY;
-
+        
+        const rect = this.viewport.gridContainer.getBoundingClientRect();
+        
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
         if (y < this.colHeaderHeight) {
             const resizeInfo = this.viewport.getResizeInfo(x, y);
             return resizeInfo.canResize && resizeInfo.type === 'col';
@@ -17,7 +19,6 @@ export class ColumnResizer {
     }
 
     pointerDown(e) {
-        console.log("Pointer down on row resizer");
         const resizeInfo = this.viewport.getResizeInfo(e.clientX, e.clientY);
         
         this.resizeType = resizeInfo.type;
@@ -32,17 +33,18 @@ export class ColumnResizer {
     }
 
     pointerUp(e){
-        console.log("This should be pointer up on column resize")
+        const colIndex = this.resizeIndex;
+        const oldWidth = this.originalSize;
+        const newWidth = this.viewport.cols.getColumnWidth(colIndex);
+
+        this.viewport.grid.eventmanager.onColumnResize(colIndex, oldWidth, newWidth);
 
         this.viewport.updateRenderer();
-        
         this.cleanup();
         e.preventDefault();
     }
 
     pointerMove(e){
-        console.log("Pointer move on column resizer");
-        
         const delta = e.clientX - this.resizeStartPos;
         const newSize = Math.max(20, this.resizeStartSize + delta);
         this.viewport.cols.setColumnWidth(this.resizeIndex, newSize);
@@ -58,12 +60,11 @@ export class ColumnResizer {
         this.resizeStartPos = 0;
         this.resizeStartSize = 0;
         this.originalSize = 0;
-        this.viewport.gridContainer.style.cursor = 'default';
         this.viewport.gridContainer.classList.remove('resizing');
     }
 
     setCursor(){
         this.viewport.gridContainer.style.cursor = 'ew-resize';
-        console.log("Setting cursor to pointer for col selection");
+        
     }
 }

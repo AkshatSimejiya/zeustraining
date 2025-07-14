@@ -51,7 +51,7 @@ export class ColumnHeader extends MainEngine {
     renderer(scrollX=0, scrollY=0, rowStart=0, colStart=0, selection = null){
         const dpr = window.devicePixelRatio || 1;
 
-        this.ctxC = this.canvas.getContext("2d")
+        this.ctx = this.canvas.getContext("2d")
         this.canvas.width = (this.gridContainer.clientWidth - this.row_header_width) * dpr;
         this.canvas.height = (this.default_row_height)  * dpr;
         this.canvas.style.width = (this.gridContainer.clientWidth - this.row_header_width)+ "px";
@@ -86,14 +86,20 @@ export class ColumnHeader extends MainEngine {
         let currentX = -scrollX;
         let colIndex = colStart;
         
+        // Draw bottom border
         ctx.beginPath();
         ctx.strokeStyle = "#d0d0d0";
-        
         ctx.moveTo(0, this.default_row_height-0.5);
         ctx.lineTo(this.viewPortWidth, this.default_row_height-0.5);
-        
+        ctx.stroke();
+        ctx.closePath();
+
+        // Draw vertical lines
         currentX = -scrollX;
         colIndex = colStart;
+        
+        ctx.beginPath();
+        ctx.strokeStyle = "#d0d0d0";
         
         while (currentX < this.viewPortWidth && colIndex < colStart + 1000) {
             const colWidth = this.cols.getColumnWidth(colIndex);
@@ -110,23 +116,50 @@ export class ColumnHeader extends MainEngine {
         ctx.stroke();
         ctx.closePath();
 
+        // Render selection highlights
         if (selection && selection.selections && selection.selections.length > 0) {
             this.renderSelectionHighlights(ctx, scrollX, colStart, selection);
         }
 
+        // Draw column labels
         currentX = -scrollX;
         colIndex = colStart;
+        
+        const isColSelection = selection && selection.selections && selection.selections.length > 0 && selection.selections[0].type === 'column';
+        const isRowSelection = selection && selection.selections && selection.selections.length > 0 && selection.selections[0].type === 'row';
+        const isCellSelection = selection && selection.selections && selection.selections.length > 0 && selection.selections[0].type === 'cell';
         
         while (currentX < this.viewPortWidth && colIndex < colStart + 1000) {
             const colWidth = this.cols.getColumnWidth(colIndex);
             
             if (currentX + colWidth >= 0) {
                 const label = this.columnLabel(colIndex);
-                
                 const isSelected = selection ? this.isColumnInSelection(colIndex, selection) : false;
-                ctx.fillStyle = isSelected ? "#107C41" : "#000";
+
+                if (isColSelection && isSelected) {
+                    ctx.fillStyle = "#107C41";
+                    ctx.fillRect(currentX, 0, colWidth, this.default_row_height - 2);
+                    ctx.fillStyle = "#ffffff"; 
+                } else if (isCellSelection && isSelected) {
+                    ctx.strokeStyle = "#a3d8ba";
+                    ctx.lineWidth = 2;
+                    ctx.lineWidth = 1 / window.devicePixelRatio;
+                    ctx.fillStyle = "#0E703C";
+                } else if (isRowSelection) {
+                    ctx.fillStyle = "#0E703C";
+                } else {
+                    ctx.fillStyle = "#000";
+                }
                 
-                ctx.fillText(label, currentX + colWidth / 2, this.default_row_height / 2);
+                ctx.fillText(label, currentX + colWidth / 2 - ctx.measureText(label).width / 2, this.default_row_height / 2);
+
+                // Draw vertical line with selection color if selected
+                ctx.beginPath();
+                ctx.strokeStyle = (isRowSelection || isSelected) ? "#a3d8ba" : "#d0d0d0";
+                ctx.moveTo(currentX + colWidth + 0.5, 0);
+                ctx.lineTo(currentX + colWidth + 0.5, this.default_row_height - 2);
+                ctx.stroke();
+                ctx.closePath();
             }
             
             currentX += colWidth;
@@ -144,6 +177,28 @@ export class ColumnHeader extends MainEngine {
      */
     renderSelectionHighlights(ctx, scrollX, colStart, selection) {
         if (!selection.selections || selection.selections.length === 0) return;
+
+        if (selection.selections[0].type === 'row') {
+            let currentX = -scrollX;
+            let colIndex = colStart;
+            while (currentX < this.viewPortWidth && colIndex < colStart + 1000) {
+                const colWidth = this.cols.getColumnWidth(colIndex);
+                if (currentX + colWidth >= 0) {
+                    ctx.fillStyle = "#CAEAD8";
+                    ctx.fillRect(currentX, 0, colWidth, this.default_row_height);
+                    ctx.strokeStyle = "#107C41";
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(currentX, this.default_row_height - 1);
+                    ctx.lineTo(currentX + colWidth, this.default_row_height - 1);
+                    ctx.stroke();
+                    ctx.lineWidth = 1 / window.devicePixelRatio;
+                }
+                currentX += colWidth;
+                colIndex++;
+            }
+            return;
+        }
 
         for (const sel of selection.selections) {
             const selectionStartCol = sel.startCol;
@@ -166,10 +221,10 @@ export class ColumnHeader extends MainEngine {
                     ctx.fillRect(startX, 0, clippedWidth, this.default_row_height);
                     
                     ctx.strokeStyle = "#107C41";
-                    ctx.lineWidth = 5;
+                    ctx.lineWidth = 2;
                     ctx.beginPath();
-                    ctx.moveTo(startX - 1, this.default_row_height);
-                    ctx.lineTo(startX + clippedWidth + 2, this.default_row_height);
+                    ctx.moveTo(startX - 1, this.default_row_height - 1);
+                    ctx.lineTo(startX + clippedWidth + 1, this.default_row_height - 1);
                     ctx.stroke();
                     ctx.lineWidth = 1 / window.devicePixelRatio;
                 }

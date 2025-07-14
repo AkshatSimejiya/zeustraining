@@ -27,14 +27,14 @@ export class ViewPort {
         this.selection = new Selection();
 
         /**@type {Canvas} The main canvas instance*/
-        this.canvas = new Canvas(this.gridContainer, 25, 100,  this.cols, this.rows);
+        this.canvas = new Canvas(this.gridContainer, 25, 25,  this.cols, this.rows);
         
         /**@type {RowHeader} The row header canvas instance*/
-        this.rowCanvas = new RowHeader(this.gridContainer, 25, 100, this.rows);
+        this.rowCanvas = new RowHeader(this.gridContainer, 25, 25, this.rows);
 
         /**@type {ColumnHeader} The column header canavs*/
-        this.colCanvas = new ColumnHeader(this.gridContainer,  25, 100, this.cols);
-        this.cornerCanvas = new CornerCanvas(this.gridContainer,  25, 100);
+        this.colCanvas = new ColumnHeader(this.gridContainer,  25, 25, this.cols);
+        this.cornerCanvas = new CornerCanvas(this.gridContainer,  25, 25);
 
         /**@type {number} Absolute Scroll Y position*/
         this.absoluteScrollY = 0;
@@ -80,10 +80,10 @@ export class ViewPort {
         this.autoScrollTimer = null;
 
         /**@type {number} The speed for auto scroll*/
-        this.autoScrollSpeed = 15;
+        this.autoScrollSpeed = 30;
 
         /**@type {number} The threshold where the auto scroll should start*/
-        this.autoScrollThreshold = 30;
+        this.autoScrollThreshold = 20;
 
         this.selection.setCallback('onSelectionChange', (selections) => {
             this.onSelectionChange(selections);
@@ -176,7 +176,7 @@ export class ViewPort {
         this.inputBox.style.top = `${cellPosition.y}px`;
         this.inputBox.style.width = `${cellPosition.width}px`;
         this.inputBox.style.height = `${cellPosition.height}px`;
-        this.inputBox.style.border = '2px solid #147E43';
+        this.inputBox.style.border = '1px solid #147E43';
         this.inputBox.style.outline = 'none';
         this.inputBox.style.fontSize = '12px';
         this.inputBox.style.padding = '2px 4px';
@@ -478,19 +478,6 @@ export class ViewPort {
     }
 
     /**
-     * Add input on double click
-     * @param {*} e event to handle double click
-     */
-    handleDoubleClick(e) {
-        const position = this.getGridPositionFromClick(e.clientX, e.clientY);
-        
-        if (!position.isHeader && position.row >= 0 && position.col >= 0) {
-            this.selection.selectCell(position.row, position.col);
-            this.createInputBox(position.row, position.col);
-        }
-    }
-
-    /**
      * handle key down for navigation
      * @param {*} e 
      */
@@ -695,6 +682,418 @@ export class ViewPort {
                 e.preventDefault();
             }
         }
+    }
+
+    /**
+     * Get the cell value
+     * @param {*} row rowindex of the cell needed
+     * @param {*} col colindex of the cell needed
+     * @returns 
+     */
+    getCellValue(row, col) {
+        if (this.datastore) {
+            return this.datastore.getCellValue(row, col) || '';
+        }
+        return '';
+    }
+
+    calculateStats(selections) {
+        const values = [];
+
+        for (const sel of selections) {
+            for (let row = sel.startRow; row <= sel.endRow; row++) {
+                for (let col = sel.startCol; col <= sel.endCol; col++) {
+                    const val = this.getCellValue(row, col);
+
+                    if (val !== null && val !== undefined && val !== '' && !isNaN(val)) {
+                        const num = parseFloat(val);
+                        if (!isNaN(num)) {
+                            values.push(num);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (values.length === 0) {
+            console.log("No numeric values in selection.");
+            return;
+        }
+
+        const count = values.length;
+        const sum = values.reduce((a, b) => a + b, 0);
+        const min = Math.min(...values);
+        const max = Math.max(...values);
+        const avg = sum / count;
+
+        console.log("Selection Stats:");
+        console.log(`Count: ${count}`);
+        console.log(`Sum: ${sum}`);
+        console.log(`Min: ${min}`);
+        console.log(`Max: ${max}`);
+        console.log(`Average: ${avg}`);
+    }
+
+
+    /**
+     * Set the datastore instance for canvas
+     * @param {DataStore} datastore object to set 
+     */
+    setDatastore(datastore) {
+        this.datastore = datastore;
+
+        
+        this.canvas.setDatastore(this.datastore)
+    }
+
+
+    /**
+     * Function to handle the scroll
+     * @param {*} e event object passed on wheel event
+     */
+    updateScroll(e){
+        if(this.inputBox){
+            this.removeInputBox();
+        }
+
+        const delta = e.deltaY * 1.1;
+
+        if (e.shiftKey) {
+            this.absoluteScrollX += delta;
+            if (this.absoluteScrollX < 0) {
+                this.absoluteScrollX = 0;
+            }
+
+            const colPosition = this.calculateColPosition(this.absoluteScrollX);
+            this.colStart = colPosition.colStart;
+            this.scroll.scrollX = colPosition.scrollX;
+
+        } else {
+            this.absoluteScrollY += delta;
+            
+            if (this.absoluteScrollY < 0) {
+                this.absoluteScrollY = 0;
+            }
+
+            const rowPosition = this.rowCanvas.calculateRowPosition(this.absoluteScrollY);
+            this.rowStart = rowPosition.rowStart;
+            this.scroll.scrollY = rowPosition.scrollY;
+        }
+
+        this.updateRenderer();
+    }
+
+    /**
+     * Remove the selection
+     */
+    removeSelection(){
+        this.canvas.removeSelection();
+    }
+
+    /**
+     * Get the position and details about the cell where the user had clicked
+     * @param {*} clientX 
+     * @param {*} clientY 
+     * @returns {object} Object with details of the cell 
+     */
+    getGridPositionFromClick(clientX, clientY) {
+        if(this.isSelect){
+            this.removeSelection();
+            this.isSelect = false;
+            return
+        }
+
+        const rect = this.gridContainer.getBoundingClientRect();
+        const containerX = clientX - rect.left;
+        const containerY = clientY - rect.top;
+        
+        const row_header_width = 30; 
+        const col_header_height = 25;
+        
+        const gridX = containerX - row_header_width;
+        const gridY = containerY - col_header_height;
+        
+        if (gridX < 0 || gridY < 0) {
+            let headerRow = -1;
+            let headerCol = -1;
+            
+            if (containerX < row_header_width && containerY >= col_header_height) {
+                const absoluteGridY = gridY + this.absoluteScrollY;
+                if (this.rows && typeof this.rows.getRowAtAbsolutePosition === 'function') {
+                    const rowResult = this.rows.getRowAtAbsolutePosition(absoluteGridY);
+                    headerRow = rowResult.row;
+                } else {
+                    let cumulativeHeight = 0;
+                    headerRow = 0;
+                    while (cumulativeHeight + this.rows.getRowHeight(headerRow) <= absoluteGridY && headerRow < this.rows.getRowCount()) {
+                        cumulativeHeight += this.rows.getRowHeight(headerRow);
+                        headerRow++;
+                    }
+                }
+            }
+            
+            if (containerY < col_header_height && containerX >= row_header_width) {
+                const absoluteGridX = gridX + this.absoluteScrollX;
+                if (this.cols && typeof this.cols.getColumnAtAbsolutePosition === 'function') {
+                    const colResult = this.cols.getColumnAtAbsolutePosition(absoluteGridX);
+                    headerCol = colResult.col;
+                } else {
+                    headerCol = Math.floor(absoluteGridX / this.default_col_width);
+                }
+            }
+            
+            return {
+                row: headerRow,
+                col: headerCol,
+                x: containerX,
+                y: containerY,
+                isHeader: true,
+                isRowHeader: containerX < row_header_width,
+                isColHeader: containerY < col_header_height
+            };
+        }
+        
+        const absoluteGridX = gridX + this.absoluteScrollX;
+        const absoluteGridY = gridY + this.absoluteScrollY;
+        
+        let col;
+        if (this.cols && typeof this.cols.getColumnAtAbsolutePosition === 'function') {
+            const colResult = this.cols.getColumnAtAbsolutePosition(absoluteGridX);
+            col = colResult.col;
+        } else {
+            col = Math.floor(absoluteGridX / this.default_col_width);
+        }
+        
+        let row;
+        if (this.rows && typeof this.rows.getRowAtAbsolutePosition === 'function') {
+            const rowResult = this.rows.getRowAtAbsolutePosition(absoluteGridY);
+            row = rowResult.row;
+        } else {
+            let cumulativeHeight = 0;
+            row = 0;
+            while (cumulativeHeight + this.rows.getRowHeight(row) <= absoluteGridY && row < this.rows.getRowCount()) {
+                cumulativeHeight += this.rows.getRowHeight(row);
+                row++;
+            }
+        }
+        
+        return {
+            row: row,
+            col: col,
+            x: containerX,
+            y: containerY,
+            gridX: gridX,
+            gridY: gridY,
+            isHeader: false,
+            absoluteGridX: absoluteGridX,
+            absoluteGridY: absoluteGridY
+        };
+    }
+
+    /**
+     * Auto scroll on selection
+     * @param {number} containerX X coordinate for the grid container or the main grid
+     * @param {number} containerY Y coordinate of the grid container
+     */
+    handleAutoScroll(containerX, containerY) {
+        const containerWidth = this.gridContainer.clientWidth;
+        const containerHeight = this.gridContainer.clientHeight;
+        const rowHeaderWidth = 30;
+        const colHeaderHeight = 25;
+        
+        let scrollDirectionX = 0;
+        let scrollDirectionY = 0;
+        
+        if (containerX < rowHeaderWidth + this.autoScrollThreshold) {
+            scrollDirectionX = -1;
+        } else if (containerX > containerWidth - this.autoScrollThreshold) {
+            scrollDirectionX = 1;
+        }
+        
+        if (containerY < colHeaderHeight + this.autoScrollThreshold) {
+            scrollDirectionY = -1;
+        } else if (containerY > containerHeight - this.autoScrollThreshold) {
+            scrollDirectionY = 1;
+        }
+        
+        if (scrollDirectionX !== 0 || scrollDirectionY !== 0) {
+            this.startAutoScroll(scrollDirectionX, scrollDirectionY);
+        } else {
+            this.stopAutoScroll();
+        }
+    }
+
+    /**
+     * Start auto scroll animation 
+     * @param {number} directionX The X direction while scrolling
+     * @param {number} directionY The Y direction while scrolling
+     */
+    startAutoScroll(directionX, directionY) {
+        this.stopAutoScroll();
+        
+        const scroll = () => {
+            let scrolled = false;
+            
+            if (directionX !== 0) {
+                const newScrollX = this.absoluteScrollX + (directionX * this.autoScrollSpeed);
+                if (newScrollX >= 0) {
+                    this.absoluteScrollX = newScrollX;
+                    
+                    const colPosition = this.calculateColPosition(this.absoluteScrollX);
+                    this.colStart = colPosition.colStart;
+                    this.scroll.scrollX = colPosition.scrollX;
+                    scrolled = true;
+                }
+            }
+            
+            if (directionY !== 0) {
+                const newScrollY = this.absoluteScrollY + (directionY * this.autoScrollSpeed);
+                if (newScrollY >= 0) {
+                    this.absoluteScrollY = newScrollY;
+                    
+                    const rowPosition = this.rowCanvas.calculateRowPosition(this.absoluteScrollY);
+                    this.rowStart = rowPosition.rowStart;
+                    this.scroll.scrollY = rowPosition.scrollY;
+                    scrolled = true;
+                }
+            }
+            
+            if (scrolled) {
+                this.updateRenderer();
+                
+                if (this.isDragging) {
+                    this.autoScrollTimer = requestAnimationFrame(scroll);
+                }
+            }
+        };
+        
+        this.autoScrollTimer = requestAnimationFrame(scroll);
+    }
+
+    /**
+     * Get the resize info for resizing operaction
+     * @param {*} clientX 
+     * @param {*} clientY  
+     */
+    getResizeInfo(clientX, clientY) {
+        const rect = this.gridContainer.getBoundingClientRect();
+        const containerX = clientX - rect.left;
+        const containerY = clientY - rect.top;
+        
+        const rowHeaderWidth = 30;
+        const colHeaderHeight = 25;
+        const resizeThreshold = 3;
+        
+        if (containerY <= colHeaderHeight && containerX >= rowHeaderWidth) {
+            const gridX = containerX - rowHeaderWidth;
+            const absoluteGridX = gridX + this.absoluteScrollX;
+            
+            let currentX = 0;
+            let colIndex = 0;
+            
+            while (currentX < absoluteGridX) {
+                const colWidth = this.cols.getColumnWidth(colIndex);
+                const nextX = currentX + colWidth;
+                
+                if (Math.abs(absoluteGridX - nextX) <= resizeThreshold) {
+                    return {
+                        canResize: true,
+                        type: 'col',
+                        index: colIndex,
+                        borderPosition: nextX
+                    };
+                }
+                
+                currentX = nextX;
+                colIndex++;
+                
+                if (colIndex > 1000) break;
+            }
+        }
+        
+        if (containerX <= rowHeaderWidth && containerY >= colHeaderHeight) {
+            const gridY = containerY - colHeaderHeight;
+            const absoluteGridY = gridY + this.absoluteScrollY;
+            
+            let currentY = 0;
+            let rowIndex = 0;
+            
+            while (currentY < absoluteGridY) {
+                const rowHeight = this.rows.getRowHeight(rowIndex);
+                const nextY = currentY + rowHeight;
+                
+                if (Math.abs(absoluteGridY - nextY) <= resizeThreshold) {
+                    return {
+                        canResize: true,
+                        type: 'row',
+                        index: rowIndex,
+                        borderPosition: nextY
+                    };
+                }
+                
+                currentY = nextY;
+                rowIndex++;
+                
+                if (rowIndex > 1000) break;
+            }
+        }
+        
+        return {
+            canResize: false,
+            type: null,
+            index: -1
+        };
+    }
+
+    /**
+     * Check if the resize opertaion can be performed or now
+     * @param {number} clientX The x co-ordinate on container 
+     * @param {number} clientY The y co-ordinate on container
+     * @returns {boolean} Boolean to indicate if resizing is possible or not
+     */
+    isNearResizeBorder(clientX, clientY) {
+        const resizeInfo = this.getResizeInfo(clientX, clientY);
+        return resizeInfo.canResize;
+    }
+
+    /**
+     * Stop auto scrolling
+     */
+    stopAutoScroll() {
+        if (this.autoScrollTimer) {
+            cancelAnimationFrame(this.autoScrollTimer);
+            this.autoScrollTimer = null;
+        }
+    }
+
+        /**
+     * Get last visible row index in viewport
+     */
+    getLastVisibleRow() {
+        let visibleHeight = this.gridContainer.clientHeight - 25; // minus col header
+        let y = 0;
+        let rowIdx = this.rowStart;
+        while (y < visibleHeight && rowIdx < this.rows.getRowCount()) {
+            y += this.rows.getRowHeight(rowIdx);
+            if (y > visibleHeight) break;
+            rowIdx++;
+        }
+        return Math.max(this.rowStart, rowIdx - 1);
+    }
+
+    /**
+     * Get last visible column index in viewport
+     */
+    getLastVisibleCol() {
+        let visibleWidth = this.gridContainer.clientWidth - 30; // minus row header
+        let x = 0;
+        let colIdx = this.colStart;
+        while (x < visibleWidth && colIdx < this.cols.getColumnCount()) {
+            x += this.cols.getColumnWidth(colIdx);
+            if (x > visibleWidth) break;
+            colIdx++;
+        }
+        return Math.max(this.colStart, colIdx - 1);
     }
 
     /**
@@ -1105,6 +1504,7 @@ export class ViewPort {
      */
     onSelectionChange(selections) {
         this.updateRenderer();
+        this.calculateStats(selections); 
     }
 
     /**

@@ -18,7 +18,6 @@ export class RowResizer {
     }
 
     pointerDown(e) {
-        console.log("Pointer down on row resizer");
         const resizeInfo = this.viewport.getResizeInfo(e.clientX, e.clientY);
         
         this.resizeType = resizeInfo.type;
@@ -34,17 +33,18 @@ export class RowResizer {
     }
 
     pointerUp(e) {
-        console.log("Pointer up on row resizer");
-            
+        const rowIndex = this.resizeIndex;
+        const oldHeight = this.originalSize;
+        const newHeight = this.viewport.rows.getRowHeight(rowIndex);
+
+        this.viewport.grid.eventmanager.onRowResize(rowIndex, oldHeight, newHeight);
+
         this.viewport.updateRenderer();
-        
         this.cleanup();
         e.preventDefault();
     }
 
     pointerMove(e) {
-        console.log("Pointer move on row resizer");
-        
         const delta = e.clientY - this.resizeStartPos;
         const newSize = Math.max(20, this.resizeStartSize + delta);
         this.viewport.rows.setRowHeight(this.resizeIndex, newSize);
@@ -56,7 +56,6 @@ export class RowResizer {
 
     setCursor(){
         this.viewport.gridContainer.style.cursor = 'ns-resize';
-        console.log("Setting cursor to pointer for row resize");
     }
 
     cleanup() {

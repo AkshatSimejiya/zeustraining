@@ -20,7 +20,7 @@ export class Selection {
      * @param {number} activeCol The col of active cell
      * @returns {object} The selected range
      */
-    selectRange(startRow, startCol, endRow, endCol, preserveExisting = false, activeRow = null, activeCol = null) {
+    selectRange(startRow, startCol, endRow, endCol, preserveExisting = false, activeRow = null, activeCol = null, type = "cell") {
         if (!preserveExisting) {
             this.clearAllSelections();
         }
@@ -37,7 +37,7 @@ export class Selection {
             endCol: maxCol,
             activeRow: activeRow || startRow,
             activeCol: activeCol || startCol,
-            type: 'cell'
+            type: type
         };
 
         this.selections.push(selection);

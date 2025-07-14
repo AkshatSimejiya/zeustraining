@@ -114,23 +114,48 @@ export class RowHeader extends MainEngine {
         ctx.stroke();
         ctx.closePath();
         
+        
         if (selection && selection.selections && selection.selections.length > 0) {
             this.renderSelectionHighlights(ctx, scrollY, rowStart, selection);
         }
         
         currentY = -scrollY;
         rowIndex = rowStart;
+        const isColSelection = selection && selection.selections && selection.selections.length > 0 && selection.selections[0].type === 'column';
+        const isRowSelection = selection && selection.selections && selection.selections.length > 0 && selection.selections[0].type === 'row';
+        const isCellSelection = selection && selection.selections && selection.selections.length > 0 && selection.selections[0].type === 'cell';
         
         while (currentY < this.viewPortHeight && rowIndex < rowStart + 1000) {
             const rowHeight = this.rows.getRowHeight(rowIndex);
             if (currentY + rowHeight >= 0) {
                 const label = rowIndex + 1;
-                
                 const isSelected = selection ? this.isRowInSelection(rowIndex, selection) : false;
-                ctx.fillStyle = isSelected ? "#107C41" : "#000";
-                ctx.fillText(label, ((this.row_header_width-5)-ctx.measureText(label).width), currentY + rowHeight / 2 + 4);
+
+                if (isRowSelection && isSelected) {
+                    ctx.fillStyle = "#107C41";
+                    ctx.fillRect(0, currentY, this.row_header_width - 2, rowHeight);
+                    ctx.fillStyle = "#ffffff"; 
+                } else if (isCellSelection && isSelected) {
+                    ctx.strokeStyle = "#a3d8ba";
+                    ctx.lineWidth = 2;
+                    ctx.lineWidth = 1 / window.devicePixelRatio;
+                    ctx.fillStyle = "#0E703C";
+                } else if (isColSelection) {
+                    ctx.fillStyle = "#0E703C";
+                } else {
+                    ctx.fillStyle = "#000";
+                }
+
+                ctx.fillText(label, ((this.row_header_width - 5) - ctx.measureText(label).width), currentY + rowHeight / 2 + 4);
+
+                ctx.beginPath();
+                ctx.strokeStyle = (isSelected) ? "#a3d8ba" : "#d0d0d0";
+                ctx.moveTo(0, currentY + rowHeight + 0.5);
+
+                ctx.lineTo(this.row_header_width - 2, currentY + rowHeight + 0.5);
+                ctx.stroke();
+                ctx.closePath();
             }
-            
             currentY += rowHeight;
             rowIndex++;
         }
@@ -147,22 +172,40 @@ export class RowHeader extends MainEngine {
     renderSelectionHighlights(ctx, scrollY, rowStart, selection) {
         if (!selection.selections || selection.selections.length === 0) return;
 
+        if (selection.selections[0].type === 'column') {
+            let currentY = -scrollY;
+            let rowIndex = rowStart;
+            while (currentY < this.viewPortHeight && rowIndex < rowStart + 1000) {
+                const rowHeight = this.rows.getRowHeight(rowIndex);
+                if (currentY + rowHeight >= 0) {
+                    ctx.fillStyle = "#CAEAD8";
+                    ctx.fillRect(0, currentY, this.row_header_width, rowHeight);
+                    ctx.strokeStyle = "#107C41";
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(this.row_header_width - 1, currentY);
+                    ctx.lineTo(this.row_header_width - 1, currentY + rowHeight);
+                    ctx.stroke();
+                    ctx.lineWidth = 1 / window.devicePixelRatio;
+                }
+                currentY += rowHeight;
+                rowIndex++;
+            }
+            return;
+        }
+
         for (const sel of selection.selections) {
             const selectionStartRow = sel.startRow;
             const selectionEndRow = sel.endRow;
-            
             let highlightY = this.getRowYPosition(selectionStartRow, rowStart, scrollY) + 1;
             let highlightHeight = 0;
-            
             for (let row = selectionStartRow; row <= selectionEndRow; row++) {
                 highlightHeight += this.rows.getRowHeight(row);
             }
-            
             if (highlightY + highlightHeight >= 0 && highlightY < this.viewPortHeight) {
                 const startY = Math.max(0, highlightY);
                 const endY = Math.min(this.viewPortHeight, highlightY + highlightHeight);
                 const clippedHeight = endY - startY;
-                
                 if (clippedHeight > 0) {
                     ctx.fillStyle = "#CAEAD8";
                     ctx.fillRect(0, startY, this.row_header_width, clippedHeight);
@@ -170,8 +213,8 @@ export class RowHeader extends MainEngine {
                     ctx.strokeStyle = "#107C41";
                     ctx.lineWidth = 2;
                     ctx.beginPath();
-                    ctx.moveTo(this.row_header_width -2, startY - 1);
-                    ctx.lineTo(this.row_header_width - 2, startY + clippedHeight + 2);
+                    ctx.moveTo(this.row_header_width - 1, startY - 1);
+                    ctx.lineTo(this.row_header_width - 1, startY + clippedHeight + 1);
                     ctx.stroke();
                     ctx.lineWidth = 1 / window.devicePixelRatio;
                 }

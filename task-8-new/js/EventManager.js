@@ -3,6 +3,7 @@ export class EventManager {
         this.eventHandlers = [];
         this.currentHandler = null;
         this.hoverHandler = null;
+
     }
 
     RegisterHandler(handler) {
@@ -10,7 +11,7 @@ export class EventManager {
     }
 
     pointerUp(e) {
-        if (this.currentHandler && this.currentHandler.pointerUp) {
+        if (this.currentHandler) {
             this.currentHandler.pointerUp(e);
         }
 
@@ -25,7 +26,7 @@ export class EventManager {
             }
         }
 
-        if (this.currentHandler && this.currentHandler.pointerDown) {
+        if (this.currentHandler) {
             this.currentHandler.pointerDown(e);
         }
     }
@@ -57,6 +58,18 @@ export class EventManager {
         }
     }
 
+    dblclick(e){
+        for (let handler of this.eventHandlers) {
+            if (handler.hitTest(e)) {
+                this.currentHandler = handler;
+                break;
+            }
+        }
+
+        if (this.currentHandler) {
+            this.currentHandler.dblclick(e);
+        }
+    }
 
 
 }

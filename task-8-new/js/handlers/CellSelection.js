@@ -17,7 +17,14 @@ export class CellSelection {
     }
 
     hitTest(e) {
-        if(e.clientX > this.rowHeaderWidth && e.clientY > this.colHeaderHeight){
+
+        const rect = this.viewport.gridContainer.getBoundingClientRect();
+        
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+
+        if(x > this.rowHeaderWidth && y > this.colHeaderHeight){
             return true;
         }else {
             return false;
@@ -25,11 +32,8 @@ export class CellSelection {
     }
 
     pointerDown(e) {
-        console.log("This is the pointer down")
-        
         const position = this.viewport.getGridPositionFromClick(e.clientX, e.clientY);
         if (e.shiftKey) {
-            console.log("First if")
             const active = this.viewport.selection.getActiveSelection();
             this.viewport.selection.selectRange(
                 active.activeRow || active.startRow, 
@@ -40,7 +44,6 @@ export class CellSelection {
                 active.activeCol || active.startCol
             );
         } else {
-            console.log("Final else for simple dragging")
             this.viewport.selection.clearAllSelections();
             this.viewport.selection.startSelection(
                 position.row, position.col, 'cell',
@@ -54,7 +57,6 @@ export class CellSelection {
     }
 
     pointerUp(e){
-        console.log("This should be pointer up")
         this.isDragging = false;
         this.dragStartRow = -1;
         this.dragStartCol = -1;
@@ -65,7 +67,7 @@ export class CellSelection {
     }
 
     pointerMove(e){
-        console.log("This should be pointer move")
+        
         if(this.isDragging){
             const rect = this.viewport.gridContainer.getBoundingClientRect();
             const containerX = e.clientX - rect.left;
@@ -88,6 +90,12 @@ export class CellSelection {
 
     setCursor(e){
         this.viewport.gridContainer.style.cursor = 'cell';
-        console.log("Setting the cursor")
+    }
+
+    dblclick(e){
+        const position = this.viewport.getGridPositionFromClick(e.clientX, e.clientY);
+        
+        this.viewport.selection.selectCell(position.row, position.col);
+        this.viewport.createInputBox(position.row, position.col);
     }
 }

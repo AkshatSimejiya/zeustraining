@@ -28,81 +28,18 @@
     position: absolute;
 }
 
-.grid-scrollbar {
-    z-index: 1000;
-    user-select: none;
-}
-
-.grid-scrollbar-vertical {
-    width: 12px;
-    right: 0;
-}
-
-.grid-scrollbar-horizontal {
-    height: 12px;
-    bottom: 0;
-}
-
-.grid-scrollbar-thumb {
-    transition: background-color 0.2s;
-}
-
-.grid-scrollbar-thumb:hover {
-    background-color: #666 !important;
-}
-
-.grid-scrollbar-thumb:active {
-    background-color: #555 !important;
-}
-
-/* .dummy {
-    width: 100vw;
-    height: 50vh;
-} */
-
-/* .overlayinput {
-    background-color: transparent;
-} */
-
-
-/* .mark-editor{
-    width: 8px;
-    height: 8px;
-    background-color: #147E43;
-    border: 3px solid #ffffff;
-} */
-
 .custom-scrollbar {
-    position: absolute;
-    background: #f0f0f0;
-    z-index: 10;
-}
-
-.custom-scrollbar.horizontal {
-    height: 12px;
-    bottom: 0;
-    left: 0;
-    right: 12px;
-}
-
-.custom-scrollbar.vertical {
-    width: 12px;
-    right: 0;
-    top: 0;
-    bottom: 12px;
-}
-
-.thumb {
-    background: #999;
-    border-radius: 6px;
-    position: absolute;
+    background: rgba(20, 126, 67, 0.3);
+    border-radius: 4px;
+    transition: background 0.2s;
     cursor: pointer;
 }
-
-.custom-scrollbar.horizontal .thumb {
-    height: 100%;
+.custom-scrollbar:hover {
+    background: rgba(20, 126, 67, 0.7);
 }
-
-.custom-scrollbar.vertical .thumb {
-    width: 100%;
+.custom-scrollbar-vertical {
+    width: 8px;
+}
+.custom-scrollbar-horizontal {
+    height: 8px;
 }

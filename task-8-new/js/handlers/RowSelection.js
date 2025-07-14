@@ -32,7 +32,6 @@ export class RowSelection {
     }
 
     setCursor(e) {
-        this.viewport.gridContainer.style.cursor = 'pointer';
-        console.log("Setting cursor to pointer for row selection");
+        this.viewport.gridContainer.style.cursor = 'url(./icons/next.png) 10 10, pointer';
     }
 }
