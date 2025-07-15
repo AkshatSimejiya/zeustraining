@@ -11,7 +11,7 @@ export class ColumnResizer {
         
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
-        if (y < this.colHeaderHeight) {
+        if (y>0 && y < this.colHeaderHeight) {
             const resizeInfo = this.viewport.getResizeInfo(x, y);
             return resizeInfo.canResize && resizeInfo.type === 'col';
         }

@@ -22,9 +22,7 @@ export class CellSelection {
         
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
-
-
-        if(x > this.rowHeaderWidth && y > this.colHeaderHeight){
+        if(x > this.rowHeaderWidth && y > this.colHeaderHeight && y < rect.height){
             return true;
         }else {
             return false;

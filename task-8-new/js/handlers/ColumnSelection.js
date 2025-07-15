@@ -13,8 +13,9 @@ export class ColumnSelection {
         
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
-
-        if (y < this.colHeaderHeight) {
+        console.log(x)
+        console.log(y)
+        if (y>0 && y < this.colHeaderHeight && x > 30) {
             const resizeInfo = this.viewport.getResizeInfo(x, y);
             return !(resizeInfo.canResize && resizeInfo.type === 'col');
         }

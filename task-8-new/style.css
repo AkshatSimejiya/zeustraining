@@ -3,6 +3,10 @@
     padding: 0;
 }
 
+body {
+    font-family: "Arial";
+}
+
 .main-wrapper {
     width: 100vw;
     height: 100vh;
@@ -15,6 +19,34 @@
     height: 50px;
     background-color: #f0f0f0;
     border-bottom: 1px solid #ccc;
+}
+
+#main-toolbar {
+    padding: 0 15px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    column-gap: 20px;
+}
+
+#main-toolbar input {
+    height: 20px;
+    padding: 3px;
+}
+
+#main-toolbar #function {
+    width: 100%;
+}
+
+#footer-toolbar{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#footer-toolbar div {
+    display: flex;
+    column-gap: 15px;
 }
 
 #grid-container {

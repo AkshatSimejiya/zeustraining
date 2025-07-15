@@ -697,42 +697,112 @@ export class ViewPort {
         return '';
     }
 
+    getMax(arr) {
+        let len = arr.length;
+        let max = -Infinity;
+
+        while (len--) {
+            max = arr[len] > max ? arr[len] : max;
+        }
+        return max;
+    }
+
+    getMin(arr) {
+        let len = arr.length;
+        let min = Infinity;
+
+        while (len--) {
+            min = arr[len] < min ? arr[len] : min;
+        }
+        return min;
+    }
+
+    /**
+     * Calculate the count, min, max, sum and average inside of a range
+     * @param {*} selections 
+     * @returns 
+     */
     calculateStats(selections) {
         const values = [];
+        let total_Count = 0;
 
         for (const sel of selections) {
-            for (let row = sel.startRow; row <= sel.endRow; row++) {
-                for (let col = sel.startCol; col <= sel.endCol; col++) {
-                    const val = this.getCellValue(row, col);
-
-                    if (val !== null && val !== undefined && val !== '' && !isNaN(val)) {
-                        const num = parseFloat(val);
-                        if (!isNaN(num)) {
-                            values.push(num);
+            if (sel.type === "column") {
+                for(let col = sel.startCol; col <= sel.endCol; col++){
+                    const colData = this.datastore.getColumnData(col);
+                    for (let row in colData) {
+                        const val = colData[row];
+                        if (val) {
+                            total_Count++;
+                            const num = parseFloat(val);
+                            if (!isNaN(num)) {
+                                values.push(num);
+                            }
+                        }
+                    }
+                }
+                
+            } else if (sel.type === "row") {
+                for(let row = sel.startRow; row <= sel.endRow; row++){
+                    const rowData = this.datastore.getRowData(row);
+                    for (let col in rowData) {
+                        const val = rowData[col];
+                        if (val) {
+                            total_Count++;
+                            const num = parseFloat(val);
+                            if (!isNaN(num)) {
+                                values.push(num);
+                            }
+                        }
+                    }
+                }
+            } else {
+                for (let row = sel.startRow; row <= sel.endRow; row++) {
+                    for (let col = sel.startCol; col <= sel.endCol; col++) {
+                        const val = this.getCellValue(row, col);
+                        if (val) {
+                            total_Count++;
+                            const num = parseFloat(val);
+                            if (!isNaN(num)) {
+                                values.push(num);
+                            }
                         }
                     }
                 }
             }
         }
 
-        if (values.length === 0) {
-            console.log("No numeric values in selection.");
+        console.log(`Count: ${total_Count}`);
+
+        if(total_Count > 1)
+            document.querySelector(".count").innerHTML = `Count: ${total_Count}`;
+        else
+            document.querySelector(".count").innerHTML = ``;
+
+        if (values.length <= 1) {
+            document.querySelector(".sum").innerHTML = ``;
+            document.querySelector(".min").innerHTML = ``;
+            document.querySelector(".max").innerHTML = ``;
+            document.querySelector(".average").innerHTML = ``;
             return;
         }
 
-        const count = values.length;
         const sum = values.reduce((a, b) => a + b, 0);
-        const min = Math.min(...values);
-        const max = Math.max(...values);
-        const avg = sum / count;
+        const min = values.reduce((a,b)=> Math.min(a,b), Infinity);
+        const max = values.reduce((a,b)=>Math.max(a,b), -Infinity);
+        const avg = sum / values.length;
 
         console.log("Selection Stats:");
-        console.log(`Count: ${count}`);
+        document.querySelector(".sum").innerHTML = `Sum: ${sum}`;
+        document.querySelector(".min").innerHTML = `Min: ${min}`;
+        document.querySelector(".max").innerHTML = `Max: ${max}`;
+        document.querySelector(".average").innerHTML = `Average: ${avg.toFixed(2)}`;
         console.log(`Sum: ${sum}`);
         console.log(`Min: ${min}`);
         console.log(`Max: ${max}`);
         console.log(`Average: ${avg}`);
     }
+
 
 
     /**

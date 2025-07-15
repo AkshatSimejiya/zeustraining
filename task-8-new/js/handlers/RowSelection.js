@@ -6,10 +6,12 @@ export class RowSelection {
     }
 
     hitTest(e) {
-        const x = e.clientX;
-        const y = e.clientY;
+        const rect = this.viewport.gridContainer.getBoundingClientRect();
+        
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
 
-        if (x < this.rowHeaderWidth) {
+        if (x < this.rowHeaderWidth && y > 25) {
             const resizeInfo = this.viewport.getResizeInfo(x, y);
             return !(resizeInfo.canResize && resizeInfo.type === 'row');
         }

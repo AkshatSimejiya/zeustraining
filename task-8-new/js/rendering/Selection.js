@@ -149,7 +149,6 @@ export class Selection {
         this.selections.push(selection);
         this.lastColSelection = col;
         this.triggerCallback('onSelectionChange', this.selections);
-        console.log(this.selections);
         return selection;
     }
 

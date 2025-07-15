@@ -6,8 +6,10 @@ export class RowResizer {
     }
 
     hitTest(e) {
-        const x = e.clientX;
-        const y = e.clientY;
+        const rect = this.viewport.gridContainer.getBoundingClientRect();
+        
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
 
         if (x < this.rowHeaderWidth) {
             const resizeInfo = this.viewport.getResizeInfo(x, y);
