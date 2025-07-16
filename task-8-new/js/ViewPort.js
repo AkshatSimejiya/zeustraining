@@ -34,6 +34,8 @@ export class ViewPort {
 
         /**@type {ColumnHeader} The column header canavs*/
         this.colCanvas = new ColumnHeader(this.gridContainer,  25, 25, this.cols);
+
+        /**@type {CornerCanvas} The corner canvas rendering class*/
         this.cornerCanvas = new CornerCanvas(this.gridContainer,  25, 25);
 
         /**@type {number} Absolute Scroll Y position*/
@@ -42,6 +44,7 @@ export class ViewPort {
         /**@type {number} Absolute Scroll X position*/
         this.absoluteScrollX = 0;
         
+        this.cellAddressInput = document.querySelector("#active-cell")
 
         /**@type {object} The scroll object to handle the scroll Y and scroll X position*/
         this.scroll = {
@@ -58,15 +61,6 @@ export class ViewPort {
         /**@type {number} The default column width*/
         this.default_col_width = 100;
 
-        /**@type {boolean} Check if its Dragging*/
-        this.isDragging = false;
-
-        /**@type {number} The starting of the drag row*/
-        this.dragStartRow = -1;
-
-        /**@type {number} The starting of the drag column*/
-        this.dragStartCol = -1;
-        
         /**@type {boolean} The boolean of the input box to check wether the box is added or not*/
         this.inputBox = null;
 
@@ -1190,43 +1184,6 @@ export class ViewPort {
         this.canvas.setDatastore(this.datastore)
     }
 
-
-    /**
-     * Function to handle the scroll
-     * @param {*} e event object passed on wheel event
-     */
-    updateScroll(e){
-        if(this.inputBox){
-            this.removeInputBox();
-        }
-
-        const delta = e.deltaY * 1.1;
-
-        if (e.shiftKey) {
-            this.absoluteScrollX += delta;
-            if (this.absoluteScrollX < 0) {
-                this.absoluteScrollX = 0;
-            }
-
-            const colPosition = this.calculateColPosition(this.absoluteScrollX);
-            this.colStart = colPosition.colStart;
-            this.scroll.scrollX = colPosition.scrollX;
-
-        } else {
-            this.absoluteScrollY += delta;
-            
-            if (this.absoluteScrollY < 0) {
-                this.absoluteScrollY = 0;
-            }
-
-            const rowPosition = this.rowCanvas.calculateRowPosition(this.absoluteScrollY);
-            this.rowStart = rowPosition.rowStart;
-            this.scroll.scrollY = rowPosition.scrollY;
-        }
-
-        this.updateRenderer();
-    }
-
     /**
      * Remove the selection
      */
@@ -1574,6 +1531,12 @@ export class ViewPort {
      */
     onSelectionChange(selections) {
         this.updateRenderer();
+
+        for(let sel of selections){
+            console.log(sel.activeRow)
+            console.log(sel.activeCol)
+            this.cellAddressInput.value = `${this.colCanvas.columnLabel(sel.activeCol)}${sel.activeRow+1}`;
+        }
         this.calculateStats(selections); 
     }
 

@@ -53,10 +53,13 @@ export class EventManager {
 
                 if (this.hoverHandler) {
                     this.hoverHandler.setCursor(e);
+                } else {
+                    document.getElementById("grid-container").style.cursor = 'pointer';
                 }
             }
         }
     }
+
 
     dblclick(e){
         for (let handler of this.eventHandlers) {

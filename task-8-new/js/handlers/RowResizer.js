@@ -10,9 +10,10 @@ export class RowResizer {
         
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
+        
 
         if (x < this.rowHeaderWidth) {
-            const resizeInfo = this.viewport.getResizeInfo(x, y);
+            const resizeInfo = this.viewport.getResizeInfo(e.clientX, e.clientY);
             return resizeInfo.canResize && resizeInfo.type === 'row';
         }
 
@@ -21,17 +22,16 @@ export class RowResizer {
 
     pointerDown(e) {
         const resizeInfo = this.viewport.getResizeInfo(e.clientX, e.clientY);
-        
+
         this.resizeType = resizeInfo.type;
         this.resizeIndex = resizeInfo.index;
         this.resizeStartPos = e.clientY;
         this.resizeStartSize = this.viewport.rows.getRowHeight(resizeInfo.index);
         this.originalSize = this.resizeStartSize;
-            
+
         this.viewport.gridContainer.classList.add('resizing');
-            
+
         e.preventDefault();
-    
     }
 
     pointerUp(e) {

@@ -21,6 +21,11 @@ export class RowSelection {
 
     pointerDown(e) {
         console.log("Pointer down on row selection");
+        const rect = this.viewport.gridContainer.getBoundingClientRect();
+        
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
         const position = this.viewport.getGridPositionFromClick(e.clientX, e.clientY);
         this.viewport.selection.selectRow(position.row, e.ctrlKey, e.shiftKey);
     }
