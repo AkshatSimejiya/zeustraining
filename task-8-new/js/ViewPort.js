@@ -110,11 +110,17 @@ export class ViewPort {
         
     }
 
+    /**
+     * Change the column header for rendering during resize
+     */
     updateColumnHeader(){
         const selectionData = this.getSelectionForRendering();
         this.colCanvas.renderer(this.scroll.scrollX, this.scroll.scrollY, this.rowStart, this.colStart, selectionData);
     }
 
+    /**
+     * Update the row header for rendering during resize
+     */
     updateRowHeader(){
         const selectionData = this.getSelectionForRendering();
         this.rowCanvas.renderer(this.scroll.scrollX, this.scroll.scrollY, this.rowStart, this.colStart, selectionData);
@@ -332,35 +338,10 @@ export class ViewPort {
                 case 'ArrowDown':
                 case 'ArrowLeft':
                 case 'ArrowRight':
-                    if (this.shouldHandleArrowKey(e)) {
                         e.preventDefault();
                         this.handleArrowNavigation(e.key);
-                    }
                     break;
             }
-        }
-    }
-
-    /**
-     * Check if arrow key should be handled for navigation or not
-     * @param {*} e 
-     * @returns 
-     */
-    shouldHandleArrowKey(e) {
-        const input = this.inputBox;
-        const cursorPos = input.selectionStart;
-        const textLength = input.value.length;
-        
-        switch (e.key) {
-            case 'ArrowLeft':
-                return cursorPos === 0;
-            case 'ArrowRight':
-                return cursorPos === textLength;
-            case 'ArrowUp':
-            case 'ArrowDown':
-                return true;
-            default:
-                return false;
         }
     }
 
@@ -372,8 +353,6 @@ export class ViewPort {
         const { row, col } = this.editingCell;
         let newRow = row;
         let newCol = col;
-        
-        
         
         this.commitCellEdit();
 
@@ -691,26 +670,6 @@ export class ViewPort {
         return '';
     }
 
-    getMax(arr) {
-        let len = arr.length;
-        let max = -Infinity;
-
-        while (len--) {
-            max = arr[len] > max ? arr[len] : max;
-        }
-        return max;
-    }
-
-    getMin(arr) {
-        let len = arr.length;
-        let min = Infinity;
-
-        while (len--) {
-            min = arr[len] < min ? arr[len] : min;
-        }
-        return min;
-    }
-
     /**
      * Calculate the count, min, max, sum and average inside of a range
      * @param {*} selections 
@@ -766,7 +725,6 @@ export class ViewPort {
             }
         }
 
-        console.log(`Count: ${total_Count}`);
 
         if(total_Count > 1)
             document.querySelector(".count").innerHTML = `Count: ${total_Count}`;
@@ -786,15 +744,10 @@ export class ViewPort {
         const max = values.reduce((a,b)=>Math.max(a,b), -Infinity);
         const avg = sum / values.length;
 
-        console.log("Selection Stats:");
         document.querySelector(".sum").innerHTML = `Sum: ${sum}`;
         document.querySelector(".min").innerHTML = `Min: ${min}`;
         document.querySelector(".max").innerHTML = `Max: ${max}`;
         document.querySelector(".average").innerHTML = `Average: ${avg.toFixed(2)}`;
-        console.log(`Sum: ${sum}`);
-        console.log(`Min: ${min}`);
-        console.log(`Max: ${max}`);
-        console.log(`Average: ${avg}`);
     }
 
 
@@ -1533,12 +1486,37 @@ export class ViewPort {
         this.updateRenderer();
 
         for(let sel of selections){
-            console.log(sel.activeRow)
-            console.log(sel.activeCol)
             this.cellAddressInput.value = `${this.colCanvas.columnLabel(sel.activeCol)}${sel.activeRow+1}`;
         }
+
         this.calculateStats(selections); 
     }
+
+    /**
+     * Change the cell label to its row and column index
+     * @param {String} label The label of cell 
+     * @returns {Object} Column Index and Row Index
+     */
+    parseCellLabel(label) {
+        const match = label.match(/^([A-Z]+)(\d+)$/i);
+        if (!match) {
+            throw new Error("Invalid cell label format");
+        }
+
+        const [, colLabel, rowStr] = match;
+        let colIndex = 0;
+
+        for (let i = 0; i < colLabel.length; i++) {
+            colIndex *= 26;
+            colIndex += colLabel.charCodeAt(i) - 65 + 1;
+        }
+
+        return {
+            col: colIndex - 1,
+            row: parseInt(rowStr, 10) - 1,
+        };
+    }
+
 
     /**
      * Function to get the details of the selection 

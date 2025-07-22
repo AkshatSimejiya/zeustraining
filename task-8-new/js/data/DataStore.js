@@ -1,8 +1,6 @@
 export class DataStore {
 
-    /**
-     * 
-     */
+    /**@type {Map} Variable to store the cells data*/
     #data;
 
     /**
@@ -34,7 +32,6 @@ export class DataStore {
             this.#data.set(key, value);
         }
         
-        // Trigger callback if value changed
         if (oldValue !== value) {
             this.triggerCallback('onCellValueChanged', { row, col, oldValue, newValue: value });
         }

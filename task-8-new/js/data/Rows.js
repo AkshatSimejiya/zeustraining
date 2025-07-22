@@ -1,6 +1,8 @@
 export class Rows {
 
+    /**@type {Map} Store the row widths*/
     #rowsData;
+
     /**
      * Initialize the Row class to handle row operations.
      */

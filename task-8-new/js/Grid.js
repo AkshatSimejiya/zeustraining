@@ -21,8 +21,11 @@ export class Grid {
      * @param {HTMLElement} gridContainer The main container for the grid
      */
     constructor(gridContainer){
-        // Command pattern setup
+        
+        /**@type {object} CommandManager */
         this.commandManager = new CommandManager();
+        
+        
         this.gridContainer = gridContainer;
 
         this.rows = new Rows();
@@ -68,13 +71,7 @@ export class Grid {
         this.eventmanager.RegisterHandler(new ColumnSelection(this.viewport));
 
 
-        this.isResizing = false;
-        this.resizeType = null;
-        this.resizeIndex = -1;
-        this.resizeStartPos = 0;
-        this.resizeStartSize = 0;
         
-        this.originalSize = 0;
         
         this.init()
     }
@@ -110,11 +107,7 @@ export class Grid {
         window.addEventListener('pointerup', (e) => {this.eventmanager.pointerUp(e)});
 
         window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && this.isResizing) {
-                this.cancelResize();
-            } else {
-                this.viewport.handleKeyDown(e);
-            }
+            this.viewport.handleKeyDown(e);
         });
     
         this.gridContainer.addEventListener('dblclick', (e) => {this.eventmanager.dblclick(e)});
@@ -130,13 +123,11 @@ export class Grid {
         this.eventmanager.onRowResize = (rowIndex, oldHeight, newHeight) => {
             const cmd = new ResizeRowCommand(this.rows, rowIndex, oldHeight, newHeight);
             this.commandManager.execute(cmd);
-            this.viewport.updateRenderer();
         };
 
         this.eventmanager.onColumnResize = (colIndex, oldWidth, newWidth) => {
             const cmd = new ResizeColumnCommand(this.cols, colIndex, oldWidth, newWidth);
             this.commandManager.execute(cmd);
-            this.viewport.updateRenderer();
         };
         
         this.viewport.updateRenderer();
