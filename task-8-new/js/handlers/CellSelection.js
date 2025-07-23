@@ -34,8 +34,8 @@ export class CellSelection {
         if (e.shiftKey) {
             const active = this.viewport.selection.getActiveSelection();
             this.viewport.selection.selectRange(
-                active.activeRow || active.startRow, 
-                active.activeCol || active.startCol,
+                active.activeRow || active.startRow || position.row , 
+                active.activeCol || active.startCol || position.col,
                 position.row, position.col,
                 true,
                 active.activeRow || active.startRow,
@@ -62,6 +62,8 @@ export class CellSelection {
         this.viewport.stopAutoScroll();
         
         this.viewport.selection.endSelection();
+
+        this.viewport.calculateStats();
     }
 
     pointerMove(e){

@@ -25,7 +25,6 @@ export class Grid {
         /**@type {object} CommandManager */
         this.commandManager = new CommandManager();
         
-        
         this.gridContainer = gridContainer;
 
         this.rows = new Rows();
@@ -60,19 +59,10 @@ export class Grid {
         this.viewport = new ViewPort(this.gridContainer, this.cols, this.rows, this.selectionSet)
         this.viewport.setDatastore(this.DataStore);
         
-        this.viewport.grid = this;
+        this.eventmanager = new EventManager(this);
 
-        this.eventmanager = new EventManager();
+        this.registerHandlers()
 
-        this.eventmanager.RegisterHandler(new CellSelection(this.viewport));
-        this.eventmanager.RegisterHandler(new RowResizer(this.viewport));
-        this.eventmanager.RegisterHandler(new RowSelection(this.viewport));
-        this.eventmanager.RegisterHandler(new ColumnResizer(this.viewport));
-        this.eventmanager.RegisterHandler(new ColumnSelection(this.viewport));
-
-
-        
-        
         this.init()
     }
 
@@ -80,7 +70,6 @@ export class Grid {
      * init method to initialize the events for handling the grid
      */
     init(){
-        // Keyboard shortcuts for undo/redo
         window.addEventListener('keydown', (e) => {
             if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
                 this.commandManager.undo();
@@ -95,10 +84,10 @@ export class Grid {
 
         this.gridContainer.addEventListener("wheel",(e)=>{
             e.preventDefault();  
-            this.updateScroll(e)
+            this.viewport.updateScroll(e);
         })
 
-        window.addEventListener("resize",(e)=>{this.updateViewPort(e)})
+        window.addEventListener("resize",(e)=>{this.viewport.updateRenderer();})
 
         window.addEventListener('pointerdown', (e) => {this.eventmanager.pointerDown(e)});
 
@@ -106,9 +95,7 @@ export class Grid {
 
         window.addEventListener('pointerup', (e) => {this.eventmanager.pointerUp(e)});
 
-        window.addEventListener('keydown', (e) => {
-            this.viewport.handleKeyDown(e);
-        });
+        window.addEventListener('keydown', (e) => {this.viewport.handleKeyDown(e);});
     
         this.gridContainer.addEventListener('dblclick', (e) => {this.eventmanager.dblclick(e)});
 
@@ -132,20 +119,12 @@ export class Grid {
         
         this.viewport.updateRenderer();
     }
-    
-    /**
-     * Update the viewport on scroll event
-     * @param {event} e wheel event  
-     */
-    updateScroll(e){
-        this.viewport.updateScroll(e);
-    }
 
-    /**
-     * Update the viewport on window resize based on the dpr
-     * @param {event} e  event object containing the mouse position
-     */
-    updateViewPort(e){
-        this.viewport.updateRenderer();
+    registerHandlers(){
+        this.eventmanager.RegisterHandler(new CellSelection(this.viewport));
+        this.eventmanager.RegisterHandler(new RowResizer(this.viewport));
+        this.eventmanager.RegisterHandler(new RowSelection(this.viewport));
+        this.eventmanager.RegisterHandler(new ColumnResizer(this.viewport));
+        this.eventmanager.RegisterHandler(new ColumnSelection(this.viewport));
     }
 }

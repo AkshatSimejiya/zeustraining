@@ -11,51 +11,52 @@ export class ColumnResizer {
         
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
+        
         if (y>0 && y < this.colHeaderHeight) {
-            const resizeInfo = this.viewport.getResizeInfo(x, y);
-            return resizeInfo.canResize && resizeInfo.type === 'col';
+            const helper = this.resizeHelper(x);
+            return helper.canResize
         }
         return false;
     }
 
     pointerDown(e) {
-        const resizeInfo = this.viewport.getResizeInfo(e.clientX, e.clientY);
+        const rect = this.viewport.gridContainer.getBoundingClientRect();
         
-        this.resizeType = resizeInfo.type;
-        this.resizeIndex = resizeInfo.index;
+        const x = e.clientX - rect.left;
+
+        this.resizeIndex = this.resizeHelper(x).index; 
         this.resizeStartPos = e.clientX;
-        this.resizeStartSize = this.viewport.cols.getColumnWidth(resizeInfo.index);
+        this.resizeStartSize = this.viewport.cols.getColumnWidth(this.resizeIndex);
         this.originalSize = this.resizeStartSize;
-            
         this.viewport.gridContainer.classList.add('resizing');
             
         e.preventDefault();
     }
 
-    pointerUp(e){
+    pointerUp(e, grid){
+        
         const colIndex = this.resizeIndex;
         const oldWidth = this.originalSize;
         const newWidth = this.viewport.cols.getColumnWidth(colIndex);
-
-        this.viewport.grid.eventmanager.onColumnResize(colIndex, oldWidth, newWidth);
-
+        
+        grid.eventmanager.onColumnResize(colIndex, oldWidth, newWidth);
+        
         this.viewport.updateRenderer();
         this.cleanup();
         e.preventDefault();
     }
 
     pointerMove(e){
+        
         const delta = e.clientX - this.resizeStartPos;
         const newSize = Math.max(20, this.resizeStartSize + delta);
         this.viewport.cols.setColumnWidth(this.resizeIndex, newSize);
-        
         this.viewport.updateColumnHeader();
         
         e.preventDefault();
     }
 
     cleanup() {
-        this.resizeType = null;
         this.resizeIndex = -1;
         this.resizeStartPos = 0;
         this.resizeStartSize = 0;
@@ -66,5 +67,34 @@ export class ColumnResizer {
     setCursor(){
         this.viewport.gridContainer.style.cursor = 'ew-resize';
         
+    }
+
+    resizeHelper(x){
+        const rowHeaderWidth = 30;
+        const gridX = x - rowHeaderWidth;
+        const absoluteGridX = gridX + this.viewport.absoluteScrollX;
+        const resizeThreshold = 4;
+        
+        let currentX = 0;
+        let colIndex = 0;
+        
+        while (currentX < absoluteGridX) {
+            const colWidth = this.viewport.cols.getColumnWidth(colIndex);
+            const nextX = currentX + colWidth;
+            
+            if (Math.abs(absoluteGridX - nextX) <= resizeThreshold) {
+                return {
+                    canResize : true,
+                    index: colIndex,
+                }
+            }
+            
+            currentX = nextX;
+            colIndex++;
+        }
+
+        return {
+            canResize: false
+        }
     }
 }

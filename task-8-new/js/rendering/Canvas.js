@@ -96,7 +96,7 @@ export class Canvas extends MainEngine {
         let rowIndex = rowStart;
         let colIndex = colStart;
         
-        while (currentY < this.viewPortHeight && rowIndex < rowStart + 100) {
+        while (currentY < this.viewPortHeight && rowIndex < rowStart + 200) {
             const rowHeight = this.rows.getRowHeight(rowIndex);
             if (currentY + rowHeight >= 0) {
                 visibleRows.push({ index: rowIndex, y: currentY, height: rowHeight });

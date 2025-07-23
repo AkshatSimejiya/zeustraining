@@ -74,11 +74,22 @@ export class ViewPort {
         this.autoScrollTimer = null;
 
         /**@type {number} The speed for auto scroll*/
-        this.autoScrollSpeed = 30;
+        this.autoScrollSpeed = 15;
 
         /**@type {number} The threshold where the auto scroll should start*/
         this.autoScrollThreshold = 20;
 
+        /** Track auto scroll state for selection */
+        this.autoScrollState = {
+            directionX: 0,
+            directionY: 0,
+            pointerDown: false,
+            mouseX: null,
+            mouseY: null,
+            isActive: false,
+            selectionType: null,
+            selectionStart: null
+        };
         this.selection.setCallback('onSelectionChange', (selections) => {
             this.onSelectionChange(selections);
         });
@@ -167,6 +178,26 @@ export class ViewPort {
         }
         
         this.inputBox = document.createElement('input');
+        
+        this.setInputStyling(cellPosition, initialValue);
+        
+        this.gridContainer.appendChild(this.inputBox);
+        
+        this.inputBox.focus();
+        
+        if (initialValue.length === 1) {
+            this.inputBox.setSelectionRange(1, 1);
+        } else {
+            this.inputBox.select();
+        }
+        
+        this.isEditing = true;
+        this.editingCell = { row, col };
+        
+        this.updateRenderer();
+    }
+
+    setInputStyling(cellPosition, initialValue){
         this.inputBox.type = 'text';
         this.inputBox.value = initialValue;
         this.inputBox.className = 'grid-cell-input';
@@ -186,21 +217,6 @@ export class ViewPort {
         
         this.inputBox.addEventListener('keydown', (e) => this.handleInputKeyDown(e));
         this.inputBox.addEventListener('blur', () => this.handleInputBlur());
-        
-        this.gridContainer.appendChild(this.inputBox);
-        
-        this.inputBox.focus();
-        
-        if (initialValue.length === 1) {
-            this.inputBox.setSelectionRange(1, 1);
-        } else {
-            this.inputBox.select();
-        }
-        
-        this.isEditing = true;
-        this.editingCell = { row, col };
-        
-        this.updateRenderer();
     }
 
 
@@ -675,9 +691,10 @@ export class ViewPort {
      * @param {*} selections 
      * @returns 
      */
-    calculateStats(selections) {
+    calculateStats() {
         const values = [];
         let total_Count = 0;
+        const selections = this.selection.selections;
 
         for (const sel of selections) {
             if (sel.type === "column") {
@@ -912,29 +929,40 @@ export class ViewPort {
      * @param {number} containerX X coordinate for the grid container or the main grid
      * @param {number} containerY Y coordinate of the grid container
      */
-    handleAutoScroll(containerX, containerY) {
+    handleAutoScroll(containerX, containerY, selectionType = null, selectionStart = null) {
         const containerWidth = this.gridContainer.clientWidth;
         const containerHeight = this.gridContainer.clientHeight;
         const rowHeaderWidth = 30;
         const colHeaderHeight = 25;
-        
+
         let scrollDirectionX = 0;
         let scrollDirectionY = 0;
-        
+
         if (containerX < rowHeaderWidth + this.autoScrollThreshold) {
             scrollDirectionX = -1;
         } else if (containerX > containerWidth - this.autoScrollThreshold) {
             scrollDirectionX = 1;
         }
-        
+
         if (containerY < colHeaderHeight + this.autoScrollThreshold) {
             scrollDirectionY = -1;
         } else if (containerY > containerHeight - this.autoScrollThreshold) {
             scrollDirectionY = 1;
         }
-        
-        if (scrollDirectionX !== 0 || scrollDirectionY !== 0) {
-            this.startAutoScroll(scrollDirectionX, scrollDirectionY);
+
+        // Track auto scroll state for global mouse events
+        this.autoScrollState = {
+            directionX: scrollDirectionX,
+            directionY: scrollDirectionY,
+            mouseX: containerX,
+            mouseY: containerY,
+            isActive: (scrollDirectionX !== 0 || scrollDirectionY !== 0),
+            selectionType,
+            selectionStart
+        };
+
+        if(scrollDirectionX !== 0 || scrollDirectionY !== 0)  {
+            this.startAutoScroll(scrollDirectionX, scrollDirectionY, selectionType, selectionStart);
         } else {
             this.stopAutoScroll();
         }
@@ -945,132 +973,57 @@ export class ViewPort {
      * @param {number} directionX The X direction while scrolling
      * @param {number} directionY The Y direction while scrolling
      */
-    startAutoScroll(directionX, directionY) {
+    startAutoScroll(directionX, directionY, selectionType = null, selectionStart = null) {
         this.stopAutoScroll();
-        
+
         const scroll = () => {
             let scrolled = false;
-            
+
             if (directionX !== 0) {
                 const newScrollX = this.absoluteScrollX + (directionX * this.autoScrollSpeed);
                 if (newScrollX >= 0) {
                     this.absoluteScrollX = newScrollX;
-                    
                     const colPosition = this.calculateColPosition(this.absoluteScrollX);
                     this.colStart = colPosition.colStart;
                     this.scroll.scrollX = colPosition.scrollX;
                     scrolled = true;
                 }
             }
-            
+
             if (directionY !== 0) {
                 const newScrollY = this.absoluteScrollY + (directionY * this.autoScrollSpeed);
                 if (newScrollY >= 0) {
                     this.absoluteScrollY = newScrollY;
-                    
                     const rowPosition = this.rowCanvas.calculateRowPosition(this.absoluteScrollY);
                     this.rowStart = rowPosition.rowStart;
                     this.scroll.scrollY = rowPosition.scrollY;
                     scrolled = true;
                 }
             }
-            
+
             if (scrolled) {
+                if (this.autoScrollState.isActive && this.selection.isRangeSelection()) {
+                    const mouseX = this.autoScrollState.mouseX;
+                    const mouseY = this.autoScrollState.mouseY;
+                    const gridPos = this.getGridPositionFromClick(mouseX, mouseY);
+                    if (gridPos && !gridPos.isHeader) {
+                        let anchor = this.autoScrollState.selectionStart || this.selection.getActiveSelection();
+                        if (anchor) {
+                            this.selection.selectRange(
+                                anchor.startRow, anchor.startCol,
+                                gridPos.row, gridPos.col,
+                                false,
+                                anchor.startRow, anchor.startCol
+                            );
+                        }
+                    }
+                }
                 this.updateRenderer();
-                
-                if (this.isDragging) {
-                    this.autoScrollTimer = requestAnimationFrame(scroll);
-                }
+                this.autoScrollTimer = requestAnimationFrame(scroll);
             }
         };
-        
+
         this.autoScrollTimer = requestAnimationFrame(scroll);
-    }
-
-    /**
-     * Get the resize info for resizing operaction
-     * @param {*} clientX 
-     * @param {*} clientY  
-     */
-    getResizeInfo(clientX, clientY) {
-        const rect = this.gridContainer.getBoundingClientRect();
-        const containerX = clientX - rect.left;
-        const containerY = clientY - rect.top;
-        
-        const rowHeaderWidth = 30;
-        const colHeaderHeight = 25;
-        const resizeThreshold = 3;
-        
-        if (containerY <= colHeaderHeight && containerX >= rowHeaderWidth) {
-            const gridX = containerX - rowHeaderWidth;
-            const absoluteGridX = gridX + this.absoluteScrollX;
-            
-            let currentX = 0;
-            let colIndex = 0;
-            
-            while (currentX < absoluteGridX) {
-                const colWidth = this.cols.getColumnWidth(colIndex);
-                const nextX = currentX + colWidth;
-                
-                if (Math.abs(absoluteGridX - nextX) <= resizeThreshold) {
-                    return {
-                        canResize: true,
-                        type: 'col',
-                        index: colIndex,
-                        borderPosition: nextX
-                    };
-                }
-                
-                currentX = nextX;
-                colIndex++;
-                
-                if (colIndex > 1000) break;
-            }
-        }
-        
-        if (containerX <= rowHeaderWidth && containerY >= colHeaderHeight) {
-            const gridY = containerY - colHeaderHeight;
-            const absoluteGridY = gridY + this.absoluteScrollY;
-            
-            let currentY = 0;
-            let rowIndex = 0;
-            
-            while (currentY < absoluteGridY) {
-                const rowHeight = this.rows.getRowHeight(rowIndex);
-                const nextY = currentY + rowHeight;
-                
-                if (Math.abs(absoluteGridY - nextY) <= resizeThreshold) {
-                    return {
-                        canResize: true,
-                        type: 'row',
-                        index: rowIndex,
-                        borderPosition: nextY
-                    };
-                }
-                
-                currentY = nextY;
-                rowIndex++;
-                
-                if (rowIndex > 1000) break;
-            }
-        }
-        
-        return {
-            canResize: false,
-            type: null,
-            index: -1
-        };
-    }
-
-    /**
-     * Check if the resize opertaion can be performed or now
-     * @param {number} clientX The x co-ordinate on container 
-     * @param {number} clientY The y co-ordinate on container
-     * @returns {boolean} Boolean to indicate if resizing is possible or not
-     */
-    isNearResizeBorder(clientX, clientY) {
-        const resizeInfo = this.getResizeInfo(clientX, clientY);
-        return resizeInfo.canResize;
     }
 
     /**
@@ -1081,36 +1034,6 @@ export class ViewPort {
             cancelAnimationFrame(this.autoScrollTimer);
             this.autoScrollTimer = null;
         }
-    }
-
-        /**
-     * Get last visible row index in viewport
-     */
-    getLastVisibleRow() {
-        let visibleHeight = this.gridContainer.clientHeight - 25; // minus col header
-        let y = 0;
-        let rowIdx = this.rowStart;
-        while (y < visibleHeight && rowIdx < this.rows.getRowCount()) {
-            y += this.rows.getRowHeight(rowIdx);
-            if (y > visibleHeight) break;
-            rowIdx++;
-        }
-        return Math.max(this.rowStart, rowIdx - 1);
-    }
-
-    /**
-     * Get last visible column index in viewport
-     */
-    getLastVisibleCol() {
-        let visibleWidth = this.gridContainer.clientWidth - 30; // minus row header
-        let x = 0;
-        let colIdx = this.colStart;
-        while (x < visibleWidth && colIdx < this.cols.getColumnCount()) {
-            x += this.cols.getColumnWidth(colIdx);
-            if (x > visibleWidth) break;
-            colIdx++;
-        }
-        return Math.max(this.colStart, colIdx - 1);
     }
 
     /**
@@ -1245,183 +1168,6 @@ export class ViewPort {
     }
 
     /**
-     * Auto scroll on selection
-     * @param {number} containerX X coordinate for the grid container or the main grid
-     * @param {number} containerY Y coordinate of the grid container
-     */
-    handleAutoScroll(containerX, containerY) {
-        const containerWidth = this.gridContainer.clientWidth;
-        const containerHeight = this.gridContainer.clientHeight;
-        const rowHeaderWidth = 30;
-        const colHeaderHeight = 25;
-        
-        let scrollDirectionX = 0;
-        let scrollDirectionY = 0;
-        
-        if (containerX < rowHeaderWidth + this.autoScrollThreshold) {
-            scrollDirectionX = -1;
-        } else if (containerX > containerWidth - this.autoScrollThreshold) {
-            scrollDirectionX = 1;
-        }
-        
-        if (containerY < colHeaderHeight + this.autoScrollThreshold) {
-            scrollDirectionY = -1;
-        } else if (containerY > containerHeight - this.autoScrollThreshold) {
-            scrollDirectionY = 1;
-        }
-        
-        if (scrollDirectionX !== 0 || scrollDirectionY !== 0) {
-            this.startAutoScroll(scrollDirectionX, scrollDirectionY);
-        } else {
-            this.stopAutoScroll();
-        }
-    }
-
-    /**
-     * Start auto scroll animation 
-     * @param {number} directionX The X direction while scrolling
-     * @param {number} directionY The Y direction while scrolling
-     */
-    startAutoScroll(directionX, directionY) {
-        this.stopAutoScroll();
-        
-        const scroll = () => {
-            let scrolled = false;
-            
-            if (directionX !== 0) {
-                const newScrollX = this.absoluteScrollX + (directionX * this.autoScrollSpeed);
-                if (newScrollX >= 0) {
-                    this.absoluteScrollX = newScrollX;
-                    
-                    const colPosition = this.calculateColPosition(this.absoluteScrollX);
-                    this.colStart = colPosition.colStart;
-                    this.scroll.scrollX = colPosition.scrollX;
-                    scrolled = true;
-                }
-            }
-            
-            if (directionY !== 0) {
-                const newScrollY = this.absoluteScrollY + (directionY * this.autoScrollSpeed);
-                if (newScrollY >= 0) {
-                    this.absoluteScrollY = newScrollY;
-                    
-                    const rowPosition = this.rowCanvas.calculateRowPosition(this.absoluteScrollY);
-                    this.rowStart = rowPosition.rowStart;
-                    this.scroll.scrollY = rowPosition.scrollY;
-                    scrolled = true;
-                }
-            }
-            
-            if (scrolled) {
-                this.updateRenderer();
-                
-                if (this.isDragging) {
-                    this.autoScrollTimer = requestAnimationFrame(scroll);
-                }
-            }
-        };
-        
-        this.autoScrollTimer = requestAnimationFrame(scroll);
-    }
-
-    /**
-     * Get the resize info for resizing operaction
-     * @param {*} clientX 
-     * @param {*} clientY  
-     */
-    getResizeInfo(clientX, clientY) {
-        const rect = this.gridContainer.getBoundingClientRect();
-        const containerX = clientX - rect.left;
-        const containerY = clientY - rect.top;
-        
-        const rowHeaderWidth = 30;
-        const colHeaderHeight = 25;
-        const resizeThreshold = 3;
-        
-        if (containerY <= colHeaderHeight && containerX >= rowHeaderWidth) {
-            const gridX = containerX - rowHeaderWidth;
-            const absoluteGridX = gridX + this.absoluteScrollX;
-            
-            let currentX = 0;
-            let colIndex = 0;
-            
-            while (currentX < absoluteGridX) {
-                const colWidth = this.cols.getColumnWidth(colIndex);
-                const nextX = currentX + colWidth;
-                
-                if (Math.abs(absoluteGridX - nextX) <= resizeThreshold) {
-                    return {
-                        canResize: true,
-                        type: 'col',
-                        index: colIndex,
-                        borderPosition: nextX
-                    };
-                }
-                
-                currentX = nextX;
-                colIndex++;
-                
-                if (colIndex > 1000) break;
-            }
-        }
-        
-        if (containerX <= rowHeaderWidth && containerY >= colHeaderHeight) {
-            const gridY = containerY - colHeaderHeight;
-            const absoluteGridY = gridY + this.absoluteScrollY;
-            
-            let currentY = 0;
-            let rowIndex = 0;
-            
-            while (currentY < absoluteGridY) {
-                const rowHeight = this.rows.getRowHeight(rowIndex);
-                const nextY = currentY + rowHeight;
-                
-                if (Math.abs(absoluteGridY - nextY) <= resizeThreshold) {
-                    return {
-                        canResize: true,
-                        type: 'row',
-                        index: rowIndex,
-                        borderPosition: nextY
-                    };
-                }
-                
-                currentY = nextY;
-                rowIndex++;
-                
-                if (rowIndex > 1000) break;
-            }
-        }
-        
-        return {
-            canResize: false,
-            type: null,
-            index: -1
-        };
-    }
-
-    /**
-     * Check if the resize opertaion can be performed or now
-     * @param {number} clientX The x co-ordinate on container 
-     * @param {number} clientY The y co-ordinate on container
-     * @returns {boolean} Boolean to indicate if resizing is possible or not
-     */
-    isNearResizeBorder(clientX, clientY) {
-        const resizeInfo = this.getResizeInfo(clientX, clientY);
-        return resizeInfo.canResize;
-    }
-
-    /**
-     * Stop auto scrolling
-     */
-    stopAutoScroll() {
-        if (this.autoScrollTimer) {
-            cancelAnimationFrame(this.autoScrollTimer);
-            this.autoScrollTimer = null;
-        }
-    }
-
-
-    /**
      * Scroll to a particular cell
      * @param {number} row Row index of that cell
      * @param {number} col Col index of that cell
@@ -1487,9 +1233,7 @@ export class ViewPort {
 
         for(let sel of selections){
             this.cellAddressInput.value = `${this.colCanvas.columnLabel(sel.activeCol)}${sel.activeRow+1}`;
-        }
-
-        this.calculateStats(selections); 
+        } 
     }
 
     /**

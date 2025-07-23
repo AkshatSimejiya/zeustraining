@@ -13,17 +13,21 @@ export class RowResizer {
         
 
         if (x < this.rowHeaderWidth) {
-            const resizeInfo = this.viewport.getResizeInfo(e.clientX, e.clientY);
-            return resizeInfo.canResize && resizeInfo.type === 'row';
+            const helper = this.resizeHelper(y);
+            return helper.canResize
         }
 
         return false;
     }
 
     pointerDown(e) {
-        const resizeInfo = this.viewport.getResizeInfo(e.clientX, e.clientY);
 
-        this.resizeType = resizeInfo.type;
+        const rect = this.viewport.gridContainer.getBoundingClientRect();
+        
+        const y = e.clientY - rect.top;
+
+        const resizeInfo = this.resizeHelper(y);
+
         this.resizeIndex = resizeInfo.index;
         this.resizeStartPos = e.clientY;
         this.resizeStartSize = this.viewport.rows.getRowHeight(resizeInfo.index);
@@ -34,12 +38,12 @@ export class RowResizer {
         e.preventDefault();
     }
 
-    pointerUp(e) {
+    pointerUp(e, grid) {
         const rowIndex = this.resizeIndex;
         const oldHeight = this.originalSize;
         const newHeight = this.viewport.rows.getRowHeight(rowIndex);
 
-        this.viewport.grid.eventmanager.onRowResize(rowIndex, oldHeight, newHeight);
+        grid.eventmanager.onRowResize(rowIndex, oldHeight, newHeight);
 
         this.viewport.updateRenderer();
         this.cleanup();
@@ -61,12 +65,39 @@ export class RowResizer {
     }
 
     cleanup() {
-        this.resizeType = null;
         this.resizeIndex = -1;
         this.resizeStartPos = 0;
         this.resizeStartSize = 0;
         this.originalSize = 0;
         this.viewport.gridContainer.style.cursor = 'default';
         this.viewport.gridContainer.classList.remove('resizing');
+    }
+
+    resizeHelper(y){
+        const colHeaderHeight = 25;
+        const gridY = y - colHeaderHeight;
+        const absoluteGridY = gridY + this.viewport.absoluteScrollY;
+        
+        let currentY = 0;
+        let rowIndex = 0;
+        const resizeThreshold = 4;
+        
+        while (currentY < absoluteGridY) {
+            const rowHeight = this.viewport.rows.getRowHeight(rowIndex);
+            const nextY = currentY + rowHeight;
+            
+            if (Math.abs(absoluteGridY - nextY) <= resizeThreshold) {
+                return {
+                    canResize: true,
+                    index: rowIndex
+                };
+            }
+            currentY = nextY;
+            rowIndex++;
+        }
+
+        return {
+            canResize: false
+        }
     }
 }

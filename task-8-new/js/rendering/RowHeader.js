@@ -100,7 +100,7 @@ export class RowHeader extends MainEngine {
         ctx.beginPath();
         ctx.strokeStyle = "#d0d0d0";
         
-        while (currentY < this.viewPortHeight && rowIndex < rowStart + 1000) {
+        while (currentY < this.viewPortHeight && rowIndex < rowStart + 200) {
             const rowHeight = this.rows.getRowHeight(rowIndex);
             if (currentY + rowHeight >= 0) {
                 ctx.moveTo(0, currentY + rowHeight + 0.5);
