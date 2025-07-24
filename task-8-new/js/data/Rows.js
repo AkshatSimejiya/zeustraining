@@ -58,41 +58,6 @@ export class Rows {
     }
 
     /**
-     * Get the position of the particular row
-     * @param {*} startRow 
-     * @param {*} scrollY 
-     * @param {*} targetIndex  
-     */
-    getRowPosition(startRow, scrollY=0, targetIndex=0) {
-        console.log(startRow, scrollY, targetIndex);
-        let pos = 0;
-        for (let i = startRow; i < targetIndex; i++) {
-            pos += this.getRowHeight(i);
-        }
-        return pos - scrollY;
-    }
-
-    /**
-     * Get the row at specific position (relative to viewport)
-     * @param {number} rowStart - The first visible row
-     * @param {number} scrollY - The scroll offset within the first visible row
-     * @param {number} y - The y position relative to the viewport
-     * @returns {number} the index of the row
-     */
-    getRowAtPosition(rowStart, scrollY, y) {
-        let currentY = -scrollY;
-        let rowIndex = rowStart;
-
-        while (currentY < y) {
-            currentY += this.getRowHeight(rowIndex);
-            if (currentY > y) break;
-            rowIndex++;
-        }
-        
-        return rowIndex;
-    }
-
-    /**
      * Get the row at absolute position (from top of the grid)
      * @param {number} absoluteY - The absolute Y position from the top of the grid
      * @returns {object} - {row: number, offsetY: number} where offsetY is the position within the row

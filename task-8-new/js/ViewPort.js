@@ -93,7 +93,12 @@ export class ViewPort {
         this.selection.setCallback('onSelectionChange', (selections) => {
             this.onSelectionChange(selections);
         });
-        
+
+
+        window.getSelections = () => this.selection.selections;
+        window.getRowHeight = (row) => this.rows.getRowHeight(row);
+        window.getColumnWidth = (col) => this.cols.getColumnWidth(col);       
+        window.getCellValue = (row, col) => this.getCellValue(row, col) 
     }
 
     /**
@@ -515,6 +520,8 @@ export class ViewPort {
             const maxRow = active.endRow;
             const minCol = active.startCol;
             const maxCol = active.endCol;
+
+            console.log("This is range selection it should work like that")
             
             if (e.key.startsWith('Arrow')) {
                 e.preventDefault();
@@ -535,7 +542,9 @@ export class ViewPort {
                         newCol = currentActiveCol + 1;
                         break;
                 }
-                
+                if(e.shiftKey){
+                    console.log("Add to selection")
+                }
                 this.selection.clearAllSelections();
                 this.selection.selectCell(newRow, newCol);
                 
@@ -1230,10 +1239,13 @@ export class ViewPort {
      */
     onSelectionChange(selections) {
         this.updateRenderer();
-
         for(let sel of selections){
             this.cellAddressInput.value = `${this.colCanvas.columnLabel(sel.activeCol)}${sel.activeRow+1}`;
         } 
+    }
+    
+    getSelectionsWindow(){
+        return this.selection.selections
     }
 
     /**
