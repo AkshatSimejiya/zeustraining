@@ -39,6 +39,7 @@ export class Selection {
             activeCol: activeCol || startCol,
             type: type
         };
+    
 
         this.selections.push(selection);
         this.triggerCallback('onSelectionChange', this.selections);

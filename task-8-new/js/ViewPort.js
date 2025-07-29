@@ -520,36 +520,78 @@ export class ViewPort {
             const maxRow = active.endRow;
             const minCol = active.startCol;
             const maxCol = active.endCol;
-
-            console.log("This is range selection it should work like that")
             
             if (e.key.startsWith('Arrow')) {
                 e.preventDefault();
-                let newRow = currentActiveRow;
-                let newCol = currentActiveCol;
                 
-                switch (e.key) {
-                    case 'ArrowUp':
-                        newRow = Math.max(0, currentActiveRow - 1);
-                        break;
-                    case 'ArrowDown':
-                        newRow = currentActiveRow + 1;
-                        break;
-                    case 'ArrowLeft':
-                        newCol = Math.max(0, currentActiveCol - 1);
-                        break;
-                    case 'ArrowRight':
-                        newCol = currentActiveCol + 1;
-                        break;
+                if(!e.shiftKey){
+                    let newRow = currentActiveRow;
+                    let newCol = currentActiveCol;
+                    switch (e.key) {
+                        case 'ArrowUp':
+                            newRow = Math.max(0, currentActiveRow - 1);
+                            break;
+                        case 'ArrowDown':
+                            newRow = currentActiveRow + 1;
+                            break;
+                        case 'ArrowLeft':
+                            newCol = Math.max(0, currentActiveCol - 1);
+                            break;
+                        case 'ArrowRight':
+                            newCol = currentActiveCol + 1;
+                            break;
+                    }
+                    this.selection.clearAllSelections();
+                    this.selection.selectCell(newRow, newCol);
+                    
+                    this.scrollToCell(newRow, newCol);
+                }else{
+                    let newStartRow = minRow;
+                    let newStartCol = minCol;
+                    let newEndRow = maxRow;
+                    let newEndCol = maxCol;
+                    let directionFlag = 0;
+
+                    switch (e.key) {
+                        case 'ArrowUp':
+                            if(newEndRow > currentActiveRow){
+                                newEndRow = Math.max(0, newEndRow - 1)
+                            }
+                            else{
+                                newStartRow = Math.max(0, newStartRow - 1)
+                            }
+                            directionFlag = -1
+                            break;
+                        case 'ArrowDown':
+                            if(currentActiveRow  > newStartRow)
+                                newStartRow += 1
+                            else
+                                newEndRow = newEndRow + 1;
+                            directionFlag = 1
+                            break;
+                        case 'ArrowLeft':
+                            if(currentActiveCol < newEndCol)
+                                newEndCol -= 1;
+                            else                                
+                                newStartCol = Math.max(0, newStartCol - 1);
+                            directionFlag = -1
+                            break;
+                        case 'ArrowRight':
+                            if(newStartCol < currentActiveCol)
+                                newStartCol += 1;
+                            else
+                                newEndCol = newEndCol + 1;
+                            directionFlag = 1
+                            break;
+                    }
+                    this.selection.clearAllSelections();
+                    this.selection.selectRange(newStartRow, newStartCol, newEndRow, newEndCol, false, currentActiveRow, currentActiveCol);
+                    if(directionFlag === 1)
+                        this.scrollToCell(newEndRow, newEndCol);
+                    else
+                        this.scrollToCell(newStartRow, newStartCol);
+                    return
                 }
-                if(e.shiftKey){
-                    console.log("Add to selection")
-                }
-                this.selection.clearAllSelections();
-                this.selection.selectCell(newRow, newCol);
-                
-                this.scrollToCell(newRow, newCol);
-                return;
             }
 
             switch (e.key) {

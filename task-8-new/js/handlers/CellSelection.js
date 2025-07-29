@@ -1,6 +1,5 @@
 export class CellSelection {
     constructor(viewport) {
-
         /**@type {number} The row header width*/
         this.rowHeaderWidth = 30;
         this.colHeaderHeight = 25;
@@ -14,10 +13,20 @@ export class CellSelection {
 
         /**@type {number} The starting of the drag column*/
         this.dragStartCol = -1;
+
+        /**@type {number} The current X position of the mouse*/
+        this.currentMouseX = 0;
+
+        /**@type {number} The current Y position of the mouse*/
+        this.currentMouseY = 0;
     }
 
+    /**
+     * Hit test to check if the handler should handle the event or not
+     * @param {Event} e The event object of the pointer move
+     * @returns {boolean} True if the conditions are met for hit test
+     */
     hitTest(e) {
-
         const rect = this.viewport.gridContainer.getBoundingClientRect();
         
         const x = e.clientX - rect.left;
@@ -29,8 +38,17 @@ export class CellSelection {
         }
     }
 
+    /**
+     * Event Handler for pointer down on cell
+     * @param {*} e Event object
+     */
     pointerDown(e) {
         const position = this.viewport.getGridPositionFromClick(e.clientX, e.clientY);
+        
+        const rect = this.viewport.gridContainer.getBoundingClientRect();
+        this.currentMouseX = e.clientX - rect.left;
+        this.currentMouseY = e.clientY - rect.top;
+        
         if (e.shiftKey) {
             const active = this.viewport.selection.getActiveSelection();
             this.viewport.selection.selectRange(
@@ -54,6 +72,10 @@ export class CellSelection {
         }
     }
 
+    /**
+     * Pointer up event handler function
+     * @param {*} e Event object
+     */
     pointerUp(e){
         this.isDragging = false;
         this.dragStartRow = -1;
@@ -66,32 +88,57 @@ export class CellSelection {
         this.viewport.calculateStats();
     }
 
+    /**
+     * Handler function for pointer move
+     * @param {*} e Event object of pointer move
+     */
     pointerMove(e){
-        
         if(this.isDragging){
             const rect = this.viewport.gridContainer.getBoundingClientRect();
             const containerX = e.clientX - rect.left;
             const containerY = e.clientY - rect.top;
             
-            this.viewport.handleAutoScroll(containerX, containerY);
+            this.currentMouseX = containerX;
+            this.currentMouseY = containerY;
             
-            const position = this.viewport.getGridPositionFromClick(e.clientX, e.clientY);
-            
-            this.viewport.selection.clearAllSelections();
-            this.viewport.selection.selectRange(
-                this.dragStartRow, this.dragStartCol,
-                position.row, position.col,
-                false,
-                this.dragStartRow,
-                this.dragStartCol
+            this.viewport.handleAutoScroll(
+                containerX, 
+                containerY, 
+                'cell', 
+                {
+                    startRow: this.dragStartRow,
+                    startCol: this.dragStartCol
+                }
             );
+            
+            if (!this.viewport.autoScrollState || !this.viewport.autoScrollState.isActive) {
+                const position = this.viewport.getGridPositionFromClick(e.clientX, e.clientY);
+                
+                if (position && !position.isHeader) {
+                    this.viewport.selection.selectRange(
+                        this.dragStartRow, this.dragStartCol,
+                        position.row, position.col,
+                        false,
+                        this.dragStartRow,
+                        this.dragStartCol
+                    );
+                }
+            }
         }
     }
 
+    /**
+     * Set the cursor when hovered over to 
+     * @param {*} e Event object
+     */
     setCursor(e){
         this.viewport.gridContainer.style.cursor = 'cell';
     }
 
+    /**
+     * Handle dblclick
+     * @param {*} e Event object
+     */
     dblclick(e){
         const position = this.viewport.getGridPositionFromClick(e.clientX, e.clientY);
         
